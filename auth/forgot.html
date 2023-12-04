@@ -1,0 +1,32 @@
+<!--#include  virtual="/header.html" -->
+
+<div class="row">
+	<div class="col-4"></div>
+
+
+	<div class="col-4">
+		<center>
+		<form action="/auth/forgot" method="POST" class="authform">
+		<div class="loginbox">
+		<b>Password Reset:</b>
+		<p/>
+		<span class="textred"><!@ERROR@!></span>
+		<table class="loginbox">
+
+		<tr><td align="right"><label for="user" class="loginlabel"><b>Username</b></label></td><td>
+		<input type="text" placeholder="Enter Username" name="user" maxlength="32" size="32" required></td></tr>
+
+		<tr><td colspan=2 align="right"><input type="submit" value="Request Password Reset">
+		<input type="reset" value="Clear Form"></td></tr>
+
+		</table>
+		</div>
+		</form>
+		</center>
+	</div>
+
+	<div class="col-4"></div>
+</div>
+
+
+<!--#include  virtual="/footer.html" -->

@@ -1,0 +1,114 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession setCookieSession emailExists getUserID createUser validate_username validate_email verify_captcha);
+use ATOMS qw(btrim);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $user = btrim($q->param('user'));
+my $email = btrim($q->param('email'));
+my $pass1 = $q->param('pass');
+my $pass2 = $q->param('pass2');
+my $resp = $q->param('g-recaptcha-response');
+
+$user = btrim($user);
+$user =~ s/\s{2,}/ /gs;
+
+my $userID = undef;
+$userID = getUserID($user) if ($user);
+
+if ($userID) {
+	# Form submitted, user exists
+	
+	do_form("Username already exists");
+
+} elsif ($email && emailExists($email)) {
+
+	do_form("Email address already in use");
+
+} elsif ($user && (length($user)<4 || length($user)>22)) {
+
+	do_form("Username must be between 4 and 22 characters in length.");
+
+} elsif ($pass1 && (length($pass1)<8 || length($pass1)>255)) {
+
+	do_form("Password must be between 8 and 255 characters in length.");
+
+} elsif (!$pass1) {
+
+	do_form("Please choose a password");
+
+} elsif (!$user) {
+
+	do_form("Please choose a username");
+
+} elsif (!verify_captcha($resp)) {
+
+	do_form("CAPTCHA Failed");
+
+} elsif ($user && $email && $pass1 && $pass2) {
+
+	if ($pass1 ne $pass2) {
+		do_form("Passwords do not match");
+	} elsif (!validate_username($user)) {
+		do_form("Invalid username format");
+	} elsif (!validate_email($email)) {
+		do_form("Invalid email address");
+	} else {
+		# Are we OK? I think so.
+		
+		if (createUser($user,$email,$pass1)) {
+
+			print $q->header;
+			print_html("header.html");
+			
+			my $html = print_html("completedregistration.html",'',1);
+			$html =~ s/<!\@USER\@!>/$user<br\/>/gs;
+			$html =~ s/<!\@EMAIL\@!>/$email<br\/>/gs;
+			print $html;
+
+			print_html("footer.html");
+
+
+		} else {
+			do_form("There was a problem creating this account. Please try again later.");
+		}
+	}
+
+} else {
+	do_form();
+}
+
+exit;
+
+
+
+##########################################################################
+
+sub do_form {
+	my $error = shift;
+
+	print $q->header;
+	#print_html("header.html");
+
+	my $html = print_html("register.html",'',1);
+	if ($error) {
+		$html =~ s/<!\@ERROR\@!>/$error<br\/>/gs;
+	}
+	print $html;
+
+	#print_html("footer.html");
+}
+
+##########################################################################
+
+

@@ -1,0 +1,329 @@
+<script>
+
+var votescore = '';
+const timoutMilliseconds = 12000;
+
+setTimeout(getJSON('https://www.edsm.net/api-system-v1/traffic?systemName=<!@SYSTEM@!>',
+        function(err, data) {
+		if (err !== null) {
+			console.log('EDSM Traffic pull: '+err);
+		} else {
+			console.log('trafficDay: '+data.traffic.day+', trafficWeek: '+data.traffic.week+', trafficTotal: '+data.traffic.total);
+			document.getElementById('trafficDay').innerHTML = commify(data.traffic.day);
+			document.getElementById('trafficWeek').innerHTML = commify(data.traffic.week);
+			document.getElementById('trafficTotal').innerHTML = commify(data.traffic.total);
+		}
+	}
+),100);
+
+setTimeout(getJSON('https://www.edsm.net/api-system-v1/estimated-value?systemName=<!@SYSTEM@!>',
+        function(err, data) {
+		if (err !== null) {
+			console.log('EDSM Estimated Value pull: '+err);
+		} else {
+			document.getElementById('estimatedScanned').innerHTML = commify(data.estimatedValue);
+			document.getElementById('estimatedMapped').innerHTML = commify(data.estimatedValueMapped);
+		}
+	}
+),100);
+
+function reloadPage() {
+	greyout();
+	location.reload();
+}
+
+function selectStars( stars ) {
+	votescore = '/'+stars;
+	updateRating();
+}
+
+function toggleFavorite() {
+	document.getElementById('ratingContainer').style.opacity=0.5;
+	document.getElementById('whirlpool').style.display="block";
+	document.getElementById('whirlpool').style.visibility="visible";
+	getHTML( '<!@REL_URL@!>/favorite/<!@POI_ID@!>', function (response) {
+		document.getElementById('ratingContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('ratingContainer').style.opacity=1;
+		document.getElementById('whirlpool').style.display="none";
+		document.getElementById('whirlpool').style.visibility="hidden";
+		initStarTips();
+		updateStars(0);
+	});
+}
+
+function updateRating() 
+{
+	document.getElementById('ratingContainer').style.opacity=0.5;
+	document.getElementById('whirlpool').style.display="block";
+	document.getElementById('whirlpool').style.visibility="visible";
+	getHTML( '<!@REL_URL@!>/voterating/<!@POI_ID@!>'+votescore, function (response) {
+		document.getElementById('ratingContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('ratingContainer').style.opacity=1;
+		document.getElementById('whirlpool').style.display="none";
+		document.getElementById('whirlpool').style.visibility="hidden";
+		initStarTips();
+		updateStars(0);
+	});
+}
+
+
+function updateStars(star) {
+	for(let i=1; i<=5; i++) {
+		if (i<=star) {
+			document.getElementById('starlabel'+i).style.color = '#0F0';
+		} else {
+			document.getElementById('starlabel'+i).style.color = '#777';
+		}
+	}
+	let found = 0;
+	if (star == 0) {
+		for(let i=1; i<=5; i++) {
+			if (document.getElementById('star'+i).checked) {
+				found = 1;
+			}
+		}
+		if (found>0) {
+			for(let i=1; i<=5; i++) {
+				document.getElementById('starlabel'+i).style.color = '#FFD700';
+				if (document.getElementById('star'+i).checked) {
+					break;
+				}
+			}
+		}
+	}
+}
+
+// Originally From (with modifications for voting stars): https://stackoverflow.com/questions/18359193/plain-javascript-tooltip
+
+function initStarTips(){
+    // purge previous for dynamic render
+    Array.from(document.querySelectorAll('.poitooltip')).forEach(el => {
+        el.remove()
+    })
+
+    // built upon: https://stackoverflow.com/a/69340293/10885535
+    Array.from(document.querySelectorAll('[data-tip]')).forEach(el => {
+        // tip
+        let tip = document.createElement('div')
+        tip.classList.add('poitooltip')
+        tip.innerText = el.getAttribute('data-tip')
+        document.body.appendChild(tip)
+
+        // arrow
+        let arrow = document.createElement('div')
+        arrow.classList.add('poitooltip-arrow')
+        tip.appendChild(arrow)
+
+        // position tip + arrow once added
+        setTimeout(() => {
+            let elmPos = el.getBoundingClientRect()
+            let tipPos = tip.getBoundingClientRect()
+            tip.style.left = (elmPos.left + (elmPos.width - tipPos.width)/2) + 'px'
+            tip.style.top = (elmPos.bottom + 15 + window.scrollY)+'px'
+            arrow.style.left = (tipPos.width/2 - 15) + 'px'
+        }, 0)
+
+	var regex = /^star(\d)/;
+
+        // toggle with mouse
+        el.onmouseover = e => {
+            tip.style.opacity = 1
+            tip.style.visibility = 'visible'
+            e.stopPropagation() // stop parent
+            let star = el.getAttribute('name').match(regex)[1];
+            updateStars(star);
+        };
+         el.onmouseout = e => {
+            tip.style.opacity = 0
+            tip.style.visibility = 'hidden'
+            updateStars(0);
+        };
+    });
+}
+
+function refreshMsgs() {
+	document.getElementById('poiMessageContainer').style.opacity=0.5;
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	getHTML( '<!@REL_URL@!>/getmsgs/<!@POI_ID@!>', function (response) {
+		document.getElementById('poiMessageContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('poiMessageContainer').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function msgaction(action, id) {
+	document.getElementById('poiMessageContainer').style.opacity=0.5;
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	getHTML( '<!@REL_URL@!>/'+action+'/'+id, function (response) {
+		document.getElementById('poiMessageContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('poiMessageContainer').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function createReply(msgID) {
+	var divID = 'replyBox' + msgID;
+	let div = document.getElementById(divID);
+
+	if (document.getElementById(divID).style.visibility == 'hidden') {
+		div.style.display="block";
+		div.style.visibility="visible";
+	} else {
+		div.style.display="none";
+		div.style.visibility="hidden";
+	}
+}
+
+function postReply(msgID) 
+{
+	document.getElementById('poiMessageContainer').style.opacity=0.5;
+	let textstring = document.getElementById('msgReplyText'+msgID).value;
+
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	let URL = '<!@REL_URL@!>/postreply/'+msgID;
+	let r   = 'postreply/'+msgID;
+
+	postHTML( URL, { r: r, text: textstring }, function (response) {
+		document.getElementById('poiMessageContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('poiMessageContainer').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function postMsgEdit(msgID) 
+{
+	document.getElementById('poiMessageContainer').style.opacity=0.5;
+	let textstring = document.getElementById('msgEditText'+msgID).value;
+
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	let URL = '<!@REL_URL@!>/editmsg/'+msgID;
+	let r   = 'editmsg/'+msgID;
+
+	postHTML( URL, { r: r, text: textstring }, function (response) {
+		document.getElementById('poiMessageContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('poiMessageContainer').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function editMsg(msgID) {
+	var divID = 'editMsg' + msgID;
+	let div = document.getElementById(divID);
+	var msgID = 'msgText' + msgID;
+	let msg = document.getElementById(msgID);
+
+	if (document.getElementById(divID).style.visibility == 'hidden') {
+		div.style.display="block";
+		div.style.visibility="visible";
+		msg.style.display="none";
+		msg.style.visibility="hidden";
+	} else {
+		div.style.display="none";
+		div.style.visibility="hidden";
+		msg.style.display="block";
+		msg.style.visibility="visible";
+	}
+}
+
+function postReplyEdit(msgID) 
+{
+	document.getElementById('poiMessageContainer').style.opacity=0.5;
+	let textstring = document.getElementById('msgEditReply'+msgID).value;
+
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	let URL = '<!@REL_URL@!>/editreply/'+msgID;
+	let r   = 'editreply/'+msgID;
+
+	postHTML( URL, { r: r, text: textstring }, function (response) {
+		document.getElementById('poiMessageContainer').innerHTML = response.documentElement.innerHTML;
+		document.getElementById('poiMessageContainer').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function editReply(msgID) {
+	var divID = 'editReply' + msgID;
+	let div = document.getElementById(divID);
+	var msgID = 'msgReply' + msgID;
+	let msg = document.getElementById(msgID);
+
+	if (document.getElementById(divID).style.visibility == 'hidden') {
+		div.style.display="block";
+		div.style.visibility="visible";
+		msg.style.display="none";
+		msg.style.visibility="hidden";
+	} else {
+		div.style.display="none";
+		div.style.visibility="hidden";
+		msg.style.display="block";
+		msg.style.visibility="visible";
+	}
+}
+
+function updateImage(action, poiID, imgID, mainURL, newURL, newTITLE) {
+	document.getElementById('poiGallery').style.opacity=0.5;
+	const myTimeout = setTimeout(reloadPage, timoutMilliseconds);
+
+	var url = '<!@REL_URL@!>/'+action+'/'+poiID+'/'+imgID;
+
+	if (newURL != null && newURL.length>0) {
+		url = url + '/' + btoa(newURL).replace('/','_');
+
+		if (newTITLE != null && newTITLE.length>0) {
+			url = url + '/' + btoa(newTITLE).replace('/','_');
+		}
+
+	}
+
+	getHTML( url, function (response) {
+		document.getElementById('poiGallery').innerHTML = response.documentElement.innerHTML;
+
+		if (mainURL != null && mainURL != '') {
+			document.getElementById('poiMainImage').src = mainURL;
+			document.getElementById('poiMainImageLink').href = mainURL;
+		}
+
+		document.getElementById('poiGallery').style.opacity=1;
+		clearTimeout(myTimeout);
+	});
+}
+
+function replace_qmarks(text) {
+	text =  text.replaceAll(/\?/g, '<<QMARK>>');
+	text =  text.replaceAll(/\&/g, '<<AMP>>');
+	text =  text.replaceAll(/\#/g, '<<HASH>>');
+	text =  text.replaceAll(/\;/g, '<<SEMI>>');
+	text =  text.replaceAll(/\:/g, '<<COLON>>');
+	text =  text.replaceAll(/\~/g, '<<TILDE>>');
+	text =  text.replaceAll(/\'/g, '<<APOS>>');
+	text =  text.replaceAll(/\"/g, '<<QUOT>>');
+	text =  text.replaceAll(/\=/g, '<<EQUAL>>');
+	text =  text.replaceAll(/\{/g, '<<OPENCURL>>');
+	text =  text.replaceAll(/\}/g, '<<CLOSECURL>>');
+	text =  text.replaceAll(/\%/g, '<<PERCENT>>');
+	text =  text.replaceAll(/\+/g, '<<PLUS>>');
+	text =  text.replaceAll(/\\/g, '<<BACKSLASH>>');
+	text =  text.replaceAll(/\//g, '<<SLASH>>');
+	return text;
+}
+
+
+// kickoff
+initStarTips();
+updateRating();
+
+// test calling again ie after dynamic content
+//setTimeout(initStarTips, 100);
+
+setTimeout(updateStars(0),100);
+
+
+</script>
+
+
+

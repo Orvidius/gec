@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+
+use lib "../perl";
+use AUTH qw(verify_email);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $code = $q->param('c');
+
+print $q->header;
+print_html("header.html");
+
+if ($code && verify_email($code)) {
+	# Link submitted and verified
+	
+	print_html("email-verified.html");
+	
+} else {
+	print_html("email-failed.html");
+}
+
+print_html("footer.html");
+
+exit;
+
+
+
+##########################################################################
+
+sub do_form {
+	my $error = shift;
+
+	print $q->header;
+	#print_html("header.html");
+
+	my $html = print_html("forgot.html",'',1);
+	if ($error) {
+		$html =~ s/<!\@ERROR\@!>/$error<br\/>/gs;
+	}
+	print $html;
+
+	#print_html("footer.html");
+}
+
+##########################################################################
+
+

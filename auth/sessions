@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession setCookieSession getUserID getActiveSessions accessPriv isAdmin);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $userID = getCookieSession();
+my $error  = '';
+
+if (!$userID || !isAdmin()) {
+	print "Location: https://edastro.com/auth/login\n\n";
+	exit;
+}
+
+print $q->header;
+print_html("/www/edastro.com/header.html");
+
+my $html = print_html("sessions.html",'',1);
+
+$html =~ s/<!\@ERROR\@!>/$error/gs;
+
+my @rows = getActiveSessions($userID);
+my $sessionHTML = '<table class="sessiondata"><tr><th>User</th><th>IP</th><th>Start</th><th>Expiration</th><th>Last Seen</th><th>Browser</th></tr>'."\n";
+
+foreach my $r (@rows) {
+	my $browser = $$r{browser};
+	$browser = substr($browser,0,20).'...' if (length($browser)>23);
+	$sessionHTML .= "<tr><td>\&nbsp;$$r{username}\&nbsp;</td><td>\&nbsp;$$r{ip}\&nbsp;</td><td>\&nbsp;$$r{created}\&nbsp;</td><td>\&nbsp;$$r{expiration}\&nbsp;</td><td>\&nbsp;$$r{lastseen}\&nbsp;</td><td>\&nbsp;$browser\&nbsp;</td></tr>\n";
+}
+$sessionHTML .= "</table>\n";
+
+$html =~ s/<!\@SESSIONS\@!>/$sessionHTML/gs;
+
+print $html;
+
+print_html("/www/edastro.com/footer.html");
+
+exit;
+
+
+
+##########################################################################
+
+

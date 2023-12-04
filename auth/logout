@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+
+use lib "../perl";
+use AUTH qw(destroySession getCookieSession);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $userID = getCookieSession();
+destroySession() if ($userID);
+print "Location: https://edastro.com/\n\n";
+
+exit;
+
+##########################################################################
+
+

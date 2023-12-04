@@ -1,0 +1,81 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession setCookieSession getUserID verifyPassword updateEmail validate_email);
+use ATOMS qw(btrim);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $oldpass = btrim($q->param('oldpass'));
+my $email = $q->param('email');
+
+my $userID = getCookieSession();
+
+if (!$userID) {
+	
+	print "Location: https://edastro.com/\n\n";
+	exit;
+
+} elsif (!$oldpass && !$email) {
+
+	do_form();
+
+} elsif (!$oldpass || !$email) {
+
+	do_form("Missing information");
+
+} elsif ($oldpass && !verifyPassword($userID,$oldpass)) {
+
+	do_form("Password incorrect");
+
+} elsif (!validate_email($email)) {
+
+	do_form("Invalid Email format");
+
+} elsif ($userID && $oldpass && verifyPassword($userID,$oldpass) && $email) {
+
+	# Are we OK? I think so.
+		
+	updateEmail($userID,$email);
+
+	print $q->header;
+	print_html("/www/edastro.com/header.html");
+	print_html("/www/edastro.com/auth/email-changed.html");
+	print_html("/www/edastro.com/footer.html");
+
+} else {
+	do_form("Error updating password");
+}
+
+exit;
+
+
+
+##########################################################################
+
+sub do_form {
+	my $error = shift;
+
+	print $q->header;
+	#print_html("header.html");
+
+	my $html = print_html("email-update.html",'',1);
+	if ($error) {
+		$html =~ s/<!\@ERROR\@!>/$error<br\/>/gs;
+	}
+	print $html;
+
+	#print_html("footer.html");
+}
+
+##########################################################################
+
+

@@ -1,0 +1,72 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+use Gravatar::URL;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession setCookieSession createSession verifyPassword getUserID getSessions);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $userID = getCookieSession();
+my $error  = '';
+
+if (!$userID) {
+	print "Location: https://edastro.com/auth/login\n\n";
+	exit;
+}
+
+print $q->header;
+print_html("/www/edastro.com/header.html");
+
+my $html = print_html("account.html",'',1);
+
+$html =~ s/<!\@USER\@!>/$sessionDATA{username}/gs;
+$html =~ s/<!\@EMAIL\@!>/$sessionDATA{email}/gs;
+$html =~ s/<!\@ERROR\@!>/$error/gs;
+
+my $verified = '';
+my $verify = '';
+
+if (!$sessionDATA{verified}) {
+	$verified = "<span class=\"textred\">Email not verified</span>";
+	$verify = "<input type=\"button\" onclick=\"location.href='/auth/resend';\" value=\"Re-send Verification Email\"/>";
+}
+
+my @rows = getSessions($userID);
+my $sessionHTML = '<table class="sessiondata"><tr><th>IP</th><th>Start</th><th>Expiration</th><th>Last Seen</th><th>Browser</th></tr>'."\n";
+
+foreach my $r (@rows) {
+	my $browser = $$r{browser};
+	$browser = substr($browser,0,20).'...' if (length($browser)>23);
+	$sessionHTML .= "<tr><td>\&nbsp;$$r{ip}\&nbsp;</td><td>\&nbsp;$$r{created}\&nbsp;</td><td>\&nbsp;$$r{expiration}\&nbsp;</td><td>\&nbsp;$$r{lastseen}\&nbsp;</td><td>\&nbsp;$browser\&nbsp;</td></tr>\n";
+}
+$sessionHTML .= "</table>\n";
+
+my $sendemails = $sessionDATA{sendemails} ? 'yes, subscribed' : 'no, not subscribed';
+
+my $avatar = gravatar_url( email => $sessionDATA{email}, rating=>'pg', size=>80, default=>'https://edastro.com/images/account-icon-grey-80px.png' );
+
+$html =~ s/<!\@VERIFY\@!>/$verify/gs;
+$html =~ s/<!\@VERIFIED\@!>/$verified/gs;
+$html =~ s/<!\@SESSIONS\@!>/$sessionHTML/gs;
+$html =~ s/<!\@SENDEMAILS\@!>/$sendemails/gs;
+$html =~ s/<!\@AVATAR\@!>/$avatar/gs;
+
+print $html;
+
+print_html("/www/edastro.com/footer.html");
+
+exit;
+
+
+
+##########################################################################
+
+

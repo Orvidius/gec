@@ -1,0 +1,92 @@
+<script>
+/**
+ * Get HTML asynchronously
+ * @param  {String}   url      The URL to get HTML from
+ * @param  {Function} callback A callback funtion. Pass in "response" variable to use returned HTML.
+ */
+var getHTML = function ( url, callback ) {
+
+	// Feature detection
+	if ( !window.XMLHttpRequest ) return;
+
+	// Create new request
+	var xhr = new XMLHttpRequest();
+
+	// Setup callback
+	xhr.onload = function() {
+		if ( callback && typeof( callback ) === 'function' ) {
+			callback( this.responseXML );
+		}
+	}
+
+	// Get the HTML
+	xhr.open( 'GET', url );
+	xhr.responseType = 'document';
+	xhr.send();
+
+};
+
+var postHTML = function ( url, params = {}, callback ) {
+	if ( !window.XMLHttpRequest ) return;
+	var xhr = new XMLHttpRequest();
+	xhr.onload = function() {
+		if ( callback && typeof( callback ) === 'function' ) {
+			callback( this.responseXML );
+		}
+	}
+	var data = new FormData();
+	const keys = Object.keys(params);
+
+	keys.forEach((key, index) => {
+		data.append( key, params[key] );
+	});
+
+	xhr.open( 'POST', url, true );
+	xhr.responseType = 'document';
+	xhr.send(data);
+};
+
+const request = ( url, params = {}, method = 'GET' ) => {
+    let options = {
+        method
+    };
+    if ( 'GET' === method ) {
+        url += '?' + ( new URLSearchParams( params ) ).toString();
+    } else {
+        options.body = JSON.stringify( params );
+    }
+    
+    //return fetch( url, options ).then( response => response.json() );
+    return fetch( url, options ).then( response => response.text() );
+};
+const do_get = ( url, params ) => request( url, params, 'GET' );
+const do_post = ( url, params ) => request( url, params, 'POST' );
+
+
+function greyout() {
+	let pos = document.getElementById('greyout').getBoundingClientRect();
+	document.getElementById('greyout').style.bottom += window.scrollY;
+	document.getElementById('greyout').style.display = 'block';
+	document.getElementById('mainbody').style.overflow = 'hidden';
+}
+
+var getJSON = function(url, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    xhr.onload = function() {
+      var status = xhr.status;
+      if (status === 200) {
+        callback(null, xhr.response);
+      } else {
+        callback(status, xhr.response);
+      }
+    };
+    xhr.send();
+};
+
+function commify(x) {
+        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+</script>

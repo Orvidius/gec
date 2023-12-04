@@ -1,0 +1,531 @@
+-- MySQL dump 10.13  Distrib 8.0.26, for Linux (x86_64)
+--
+-- Host: localhost    Database: edastro
+-- ------------------------------------------------------
+-- Server version	8.0.26
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `GMP`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `GMP` (
+  `id` int NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `galMapSearch` varchar(255) DEFAULT NULL,
+  `galMapUrl` varchar(255) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `descriptionMardown` text,
+  `descriptionHtml` text,
+  `coord_x` decimal(15,9) DEFAULT NULL,
+  `coord_y` decimal(15,9) DEFAULT NULL,
+  `coord_z` decimal(15,9) DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `nameKey` (`galMapSearch`),
+  KEY `poiKey` (`name`),
+  KEY `coordKey` (`coord_x`,`coord_y`,`coord_z`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `carriers`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `carriers` (
+  `ID` bigint DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  `marketID` bigint DEFAULT NULL,
+  `callsign` varchar(15) NOT NULL,
+  `callsign_old` varchar(15) DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `lastEvent` datetime DEFAULT NULL,
+  `lastMoved` datetime DEFAULT NULL,
+  `FSSdate` datetime DEFAULT NULL,
+  `systemId64` bigint DEFAULT NULL,
+  `systemName` varchar(63) DEFAULT NULL,
+  `distanceToArrival` bigint DEFAULT NULL,
+  `PendingDecommission` tinyint DEFAULT NULL,
+  `services` varchar(255) DEFAULT NULL,
+  `AllowNotorious` tinyint DEFAULT NULL,
+  `DockingAccess` varchar(20) DEFAULT NULL,
+  `FuelLevel` int DEFAULT NULL,
+  `CarrierBalance` bigint DEFAULT NULL,
+  `TaxRate` float DEFAULT NULL,
+  `coord_x` float DEFAULT NULL,
+  `coord_y` float DEFAULT NULL,
+  `coord_z` float DEFAULT NULL,
+  `commander` varchar(255) DEFAULT NULL,
+  `isDSSA` tinyint DEFAULT NULL,
+  `isIGAU` tinyint DEFAULT NULL,
+  `wasDSSA` tinyint DEFAULT NULL,
+  `converted` tinyint DEFAULT NULL,
+  `invisible` tinyint NOT NULL DEFAULT '0',
+  `note` varchar(255) DEFAULT NULL,
+  `status` varchar(15) DEFAULT NULL,
+  PRIMARY KEY (`callsign`),
+  KEY `idKey` (`marketID`),
+  KEY `callsignKey` (`callsign`),
+  KEY `nameKey` (`name`),
+  KEY `id64Key` (`systemId64`),
+  KEY `systemNameKey` (`systemName`),
+  KEY `DSSAkey` (`isDSSA`),
+  KEY `IGAUkey` (`isIGAU`),
+  KEY `lastMovedKey` (`lastMoved`),
+  KEY `lastEventKey` (`lastEvent`),
+  KEY `FSSkey` (`FSSdate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `categories`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `categories` (
+  `ID` tinyint NOT NULL DEFAULT '0',
+  `catname` varchar(32) DEFAULT NULL,
+  `curatorOnly` tinyint NOT NULL DEFAULT '0',
+  `deleted` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `discords`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `discords` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `webhook` varchar(255) DEFAULT NULL,
+  `note` varchar(255) DEFAULT NULL,
+  `public` tinyint NOT NULL DEFAULT '0',
+  `sendnew` tinyint NOT NULL DEFAULT '0',
+  `sendapproved` tinyint NOT NULL DEFAULT '0',
+  `sendlogs` tinyint NOT NULL DEFAULT '0',
+  `sendmsgs` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `eddn`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `eddn` (
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `eddndate` datetime DEFAULT NULL,
+  `eventdate` timestamp NULL DEFAULT NULL,
+  `coord_x` float DEFAULT NULL,
+  `coord_y` float DEFAULT NULL,
+  `coord_z` float DEFAULT NULL,
+  `eventtype` varchar(63) DEFAULT NULL,
+  `systemName` varchar(63) DEFAULT NULL,
+  `bodyType` varchar(63) DEFAULT NULL,
+  `uploaderID` varchar(255) DEFAULT NULL,
+  `sol_dist` float DEFAULT NULL,
+  KEY `dateKey` (`updated`),
+  KEY `typeKey` (`eventtype`),
+  KEY `uploaderIDkey` (`uploaderID`),
+  KEY `solKey` (`sol_dist`),
+  KEY `bodyKey` (`bodyType`),
+  KEY `eddnDateKey` (`eddndate`),
+  KEY `eventDateKey` (`eventdate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `editlog`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `editlog` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `edited` datetime DEFAULT NULL,
+  `poiID` int NOT NULL DEFAULT '0',
+  `userID` int NOT NULL DEFAULT '0',
+  `iconoverride` varchar(32) DEFAULT NULL,
+  `catID` tinyint DEFAULT NULL,
+  `catID2` tinyint DEFAULT NULL,
+  `name` varchar(64) DEFAULT NULL,
+  `systemname` varchar(64) DEFAULT NULL,
+  `region` tinyint DEFAULT NULL,
+  `callsign` varchar(7) DEFAULT NULL,
+  `summary` varchar(255) DEFAULT NULL,
+  `discoverer` varchar(32) DEFAULT NULL,
+  `description` text,
+  `journal` text,
+  `observatory` text,
+  `latitude` decimal(15,9) DEFAULT NULL,
+  `longitude` decimal(15,9) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `poiKey` (`poiID`),
+  KEY `userKey` (`userID`)
+) ENGINE=InnoDB AUTO_INCREMENT=2255 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `favs`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `favs` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `ownerID` int NOT NULL,
+  `poiID` int NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ID`),
+  KEY `poiKey` (`poiID`)
+) ENGINE=InnoDB AUTO_INCREMENT=670 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `gallery`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `gallery` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `poiID` int NOT NULL,
+  `ownerID` int NOT NULL,
+  `title` varchar(32) DEFAULT NULL,
+  `localimage` varchar(255) DEFAULT NULL,
+  `imagelink` varchar(255) DEFAULT NULL,
+  `thumbnail` varchar(255) DEFAULT NULL,
+  `hidden` datetime DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  `deleted` datetime DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `ownerKey` (`ownerID`),
+  KEY `poiKey` (`poiID`)
+) ENGINE=InnoDB AUTO_INCREMENT=673 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `msgs`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `msgs` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `authorID` bigint DEFAULT NULL,
+  `poiID` bigint DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  `edited` datetime DEFAULT NULL,
+  `deleted` datetime DEFAULT NULL,
+  `hidden` datetime DEFAULT NULL,
+  `reason` varchar(255) DEFAULT NULL,
+  `message` text,
+  `visibility` tinyint NOT NULL DEFAULT '0',
+  PRIMARY KEY (`ID`),
+  KEY `poiKey` (`poiID`),
+  KEY `poiReplyKey` (`ID`)
+) ENGINE=InnoDB AUTO_INCREMENT=398 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `poi`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `poi` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `ownerID` int NOT NULL,
+  `originalOwnerID` int DEFAULT NULL,
+  `iconoverride` varchar(32) DEFAULT NULL,
+  `catID` tinyint NOT NULL DEFAULT '0',
+  `catID2` tinyint DEFAULT NULL,
+  `created` datetime DEFAULT NULL,
+  `edited` datetime DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `name` varchar(64) DEFAULT NULL,
+  `horizons` tinyint NOT NULL DEFAULT '0',
+  `odyssey` tinyint NOT NULL DEFAULT '0',
+  `systemname` varchar(64) DEFAULT NULL,
+  `id64` bigint DEFAULT NULL,
+  `coord_x` decimal(15,9) DEFAULT NULL,
+  `coord_y` decimal(15,9) DEFAULT NULL,
+  `coord_z` decimal(15,9) DEFAULT NULL,
+  `region` tinyint NOT NULL DEFAULT '0',
+  `edsm_id` bigint DEFAULT NULL,
+  `sol_dist` decimal(15,9) DEFAULT NULL,
+  `callsign` varchar(7) DEFAULT NULL,
+  `toplocalimage` varchar(255) DEFAULT NULL,
+  `topimage` varchar(255) DEFAULT NULL,
+  `mainimage` int DEFAULT NULL,
+  `mainimagehidden` datetime DEFAULT NULL,
+  `mainimagethumb` varchar(255) DEFAULT NULL,
+  `summary` varchar(255) DEFAULT NULL,
+  `stars` decimal(3,2) NOT NULL DEFAULT '0.00',
+  `score` decimal(9,2) DEFAULT NULL,
+  `votes` int DEFAULT NULL,
+  `cscore` decimal(9,2) DEFAULT NULL,
+  `curations` int DEFAULT NULL,
+  `hidden` datetime DEFAULT NULL,
+  `requestdelete` datetime DEFAULT NULL,
+  `deleted` datetime DEFAULT NULL,
+  `reported` datetime DEFAULT NULL,
+  `approved` datetime DEFAULT NULL,
+  `requestapprove` datetime DEFAULT NULL,
+  `discoverer` varchar(32) DEFAULT NULL,
+  `latitude` decimal(15,9) DEFAULT NULL,
+  `longitude` decimal(15,9) DEFAULT NULL,
+  `rare` tinyint NOT NULL DEFAULT '0',
+  `max_img_override` int DEFAULT NULL,
+  `estimatedValue` bigint DEFAULT NULL,
+  `estimatedValueMapped` bigint DEFAULT NULL,
+  `estimatedValueDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `nameKey` (`name`),
+  KEY `sysnameKey` (`systemname`),
+  KEY `id64Key` (`id64`),
+  KEY `coordKey` (`coord_x`,`coord_y`,`coord_z`),
+  KEY `ownerKey` (`ownerID`),
+  KEY `catKey` (`catID`),
+  KEY `deletedKey` (`deleted`),
+  KEY `reportedKey` (`reported`),
+  KEY `starsKey` (`stars`),
+  KEY `requestKey` (`requestdelete`)
+) ENGINE=InnoDB AUTO_INCREMENT=479 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `poidata`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `poidata` (
+  `poiID` int NOT NULL,
+  `poiname` text,
+  `description` text,
+  `descriptionHTML` text,
+  `journal` text,
+  `observatory` text,
+  PRIMARY KEY (`poiID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `poiimages`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `poiimages` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `poiID` int NOT NULL,
+  `localimage` varchar(255) DEFAULT NULL,
+  `imagelink` varchar(255) DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `poiKey` (`poiID`)
+) ENGINE=InnoDB AUTO_INCREMENT=682 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `ratelimit`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `ratelimit` (
+  `ip` varchar(40) NOT NULL DEFAULT '',
+  `epoch` bigint DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `remaining` int DEFAULT NULL,
+  PRIMARY KEY (`ip`),
+  KEY `epochKey` (`epoch`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `regions`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `regions` (
+  `id` tinyint NOT NULL,
+  `regionname` varchar(80) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `regionName` (`regionname`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `replies`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `replies` (
+  `replyID` int NOT NULL AUTO_INCREMENT,
+  `msgID` int NOT NULL,
+  `authorID` int NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  `edited` datetime DEFAULT NULL,
+  `deleted` datetime DEFAULT NULL,
+  `reply` text,
+  PRIMARY KEY (`replyID`),
+  KEY `msgKey` (`msgID`),
+  KEY `authorKey` (`authorID`)
+) ENGINE=InnoDB AUTO_INCREMENT=482 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `roles`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `roles` (
+  `ID` tinyint NOT NULL,
+  `name` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `settings`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `settings` (
+  `field` varchar(63) DEFAULT NULL,
+  `value` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `systems`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `systems` (
+  `id64` bigint NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  PRIMARY KEY (`id64`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `users`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `users` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `nickname` varchar(32) DEFAULT NULL,
+  `username` varchar(32) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `created` datetime DEFAULT NULL,
+  `access` tinyint NOT NULL DEFAULT '0',
+  `canVote` tinyint NOT NULL DEFAULT '1',
+  `banned` datetime DEFAULT NULL,
+  `banreason` varchar(255) DEFAULT NULL,
+  `admin` tinyint NOT NULL DEFAULT '0',
+  `verified` tinyint NOT NULL DEFAULT '0',
+  `verifycode` varchar(32) DEFAULT NULL,
+  `resetcode` varchar(32) DEFAULT NULL,
+  `resetexpire` datetime DEFAULT NULL,
+  `loginLockout` datetime DEFAULT NULL,
+  `rating` decimal(9,2) NOT NULL DEFAULT '0.00',
+  `votes` int NOT NULL DEFAULT '0',
+  `betatester` tinyint NOT NULL DEFAULT '0',
+  `sendemails` tinyint NOT NULL DEFAULT '1',
+  `unsubcode` varchar(255) DEFAULT NULL,
+  `roster_pagesize` int DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `userKey` (`username`),
+  KEY `emailKey` (`email`),
+  KEY `verifyKey` (`verifycode`),
+  KEY `resetKey` (`resetcode`),
+  KEY `unsubKey` (`unsubcode`)
+) ENGINE=InnoDB AUTO_INCREMENT=1648 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `usersessions`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `usersessions` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `sessionID` varchar(63) DEFAULT NULL,
+  `userID` int NOT NULL,
+  `created` datetime DEFAULT NULL,
+  `expiration` datetime DEFAULT NULL,
+  `lastseen` datetime DEFAULT NULL,
+  `ip` varchar(39) DEFAULT NULL,
+  `browser` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  KEY `userKey` (`userID`),
+  KEY `sessionKey` (`sessionID`)
+) ENGINE=InnoDB AUTO_INCREMENT=4529 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `votes`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `votes` (
+  `ID` int NOT NULL AUTO_INCREMENT,
+  `voterID` int NOT NULL,
+  `poiID` int NOT NULL,
+  `score` tinyint DEFAULT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`ID`),
+  KEY `voterKey` (`voterID`),
+  KEY `poiKey` (`poiID`)
+) ENGINE=InnoDB AUTO_INCREMENT=6408 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2023-12-04 16:28:19

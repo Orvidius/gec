@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+#use CGI::Carp qw(fatalsToBrowser);
+use CGI;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession toggle_subscription getUserID);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $userID = getCookieSession();
+my $error  = '';
+
+if (!$userID) {
+        print "Location: https://edastro.com/auth/login\n\n";
+        exit;
+}
+
+toggle_subscription($userID);
+
+print "Location: https://edastro.com/auth/account\n\n";
+exit;
+
+
+
+
+##########################################################################
+
+

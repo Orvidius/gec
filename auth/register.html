@@ -1,0 +1,43 @@
+<!--#include  virtual="/header.html" -->
+
+<div class="row">
+	<div class="col-4"></div>
+
+
+	<div class="col-4">
+		<center>
+		<form action="/auth/register" method="POST">
+		<div class="loginbox">
+		<b>Register with EDAstro:</b>
+		<p/>
+		<span class="textred"><!@ERROR@!></span>
+		<table class="loginbox">
+
+		<tr><td align="right"><label for="user" class="loginlabel"><b>Username</b></label></td><td>
+		<input type="text" placeholder="Enter Username" name="user" maxlength="32" size="32" required></td></tr>
+
+		<tr><td align="right"><label for="email" class="loginlabel"><b>Email</b></label></td><td>
+		<input type="text" placeholder="Enter Email" name="email" maxlength="127" size="32" required></td></tr>
+
+		<tr><td align="right"><label for="pass" class="loginlabel"><b>Password</b></label></td><td>
+		<input type="password" placeholder="Enter Password" name="pass" maxlength="127" size="32" required></td></tr>
+
+		<tr><td align="right"><label for="pass2" class="loginlabel"><b>Re-enter Password</b></label></td><td>
+		<input type="password" placeholder="Enter Password" name="pass2" maxlength="127" size="32" required></td></tr>
+
+		<tr><td colspan=2><div class="g-recaptcha" data-sitekey="6Ld2yMMfAAAAAKamxElDogGtHDz4NZ38jB63d6yy" data-theme="dark"></div></td></tr>
+
+		<tr><td colspan=2 align="right"><input type="submit" value="Create Account">
+		<input type="reset" value="Clear Form"></td></tr>
+
+		</table>
+		</div>
+		</form>
+		</center>
+	</div>
+
+	<div class="col-4"></div>
+</div>
+
+
+<!--#include  virtual="/footer.html" -->

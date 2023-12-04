@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+#use CGI::Carp qw(fatalsToBrowser);
+use CGI;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession unsubscribe getUserID);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $code = $q->param('unsub');
+my $user = unsubscribe($code);
+
+print $q->header;
+my $html = print_html("unsubscribed.html",'',1);
+$html =~ s/<!\@USER\@!>/$user/gs;
+print $html;
+
+exit;
+
+
+
+
+##########################################################################
+
+

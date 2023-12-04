@@ -1,0 +1,35 @@
+<!--#include  virtual="/header.html" -->
+
+<div class="row">
+	<div class="col-4"></div>
+
+
+	<div class="col-4">
+		<center>
+		<form action="/auth/email" method="POST">
+		<div class="loginbox">
+		<b>Change your email:</b>
+		<p/>
+		<span class="textred"><!@ERROR@!></span>
+		<table class="loginbox">
+
+		<tr><td align="right"><label for="oldpass" class="loginlabel"><b>Current Password</b></label></td><td>
+		<input type="password" placeholder="Enter Password" name="oldpass" maxlength="127" size="32" required></td></tr>
+
+		<tr><td align="right"><label for="email" class="loginlabel"><b>New Email</b></label></td><td>
+		<input type="text" placeholder="new email" name="email" maxlength="127" size="32" required></td></tr>
+
+		<tr><td colspan=2 align="right"><input type="submit" value="Update Email">
+		<input type="reset" value="Clear Form"></td></tr>
+
+		</table>
+		</div>
+		</form>
+		</center>
+	</div>
+
+	<div class="col-4"></div>
+</div>
+
+
+<!--#include  virtual="/footer.html" -->

@@ -1,0 +1,97 @@
+#!/usr/bin/perl
+use strict;
+
+##########################################################################
+
+use CGI;
+use LWP::Simple;
+use LWP::UserAgent;
+use HTML::Entities;
+use JSON;
+use HTTP::Request;
+use HTTP::Request::Common;
+
+use lib "../perl";
+use AUTH qw(%sessionDATA $sessionID getCookieSession setCookieSession createSession verifyPassword getUserID checkLockout setLockout info verify_captcha);
+use HTML qw(print_html red_print);
+
+##########################################################################
+
+my $q = new CGI;
+
+my $userID = getCookieSession();
+
+my $user = $q->param('user');
+my $pass = $q->param('pass');
+my $link = $q->param('link');
+my $resp = $q->param('g-recaptcha-response');
+$link = $ENV{HTTP_REFERER} if ($ENV{HTTP_REFERER} && !$link);
+
+info("User=$user, captcha response: $resp");
+
+redirection() if ($userID);
+
+$userID = undef;
+$userID = getUserID($user) if ($user);
+
+if ($user && $pass) {
+	# Form submitted, user exists
+
+	if ($userID) {
+		if (checkLockout($userID)) {
+			if (verify_captcha($resp)) {
+				if (verifyPassword($userID,$pass)) {
+					createSession($userID);
+					setCookieSession();
+					setLockout($userID,3);
+					redirection();
+				} else {
+					do_form("Username or Password not correct");
+				}
+			} else {
+				do_form("CAPTCHA failed");
+			}
+		} else {
+			do_form("Login attempts too quick");
+		}
+	} else {
+		do_form("Username or Password not correct");
+	}
+} else {
+	do_form();
+}
+
+exit;
+
+##########################################################################
+
+sub do_form {
+	my $error = shift;
+
+	print $q->header;
+	#print_html("/www/edastro.com/header.html");
+
+	my $html = print_html("login2.html",'',1);
+	if ($error) {
+		$html =~ s/<!\@ERROR\@!>/$error<br\/>/gs;
+	}
+	$html =~ s/<!\@LINK\@!>/$link/gs;
+	print $html;
+
+	#print_html("/www/edastro.com/footer.html");
+}
+
+sub redirection {
+	if ($link && $link !~ /login\.cgi/ && $link !~ /auth\/login/) {
+		print "Location: $link\n\n";
+	} elsif ($ENV{HTTP_REFERER} && $ENV{HTTP_REFERER} !~ /login\.cgi/ && $ENV{HTTP_REFERER} !~ /auth\/login/ && $ENV{HTTP_REFERER} =~ /edastro.com/) {
+		print "Location: $ENV{HTTP_REFERER}\n\n";
+	} else {
+		print "Location: https://edastro.com/\n\n";
+	}
+	exit;
+}
+
+##########################################################################
+
+

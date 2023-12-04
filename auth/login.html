@@ -1,0 +1,42 @@
+<!--#include  virtual="/header.html" -->
+
+<div class="row">
+	<div class="col-4"></div>
+
+
+	<div class="col-4">
+		<center>
+		<form action="/auth/login" method="POST" class="authform">
+		<div class="loginbox">
+		<b>Login to EDAstro:</b>
+		<p/>
+		<span class="textred"><!@ERROR@!></span>
+		<input type="hidden" name="link" value="<!@LINK@!>">
+		<table class="loginbox">
+
+		<tr><td align="right"><label for="user" class="loginlabel"><b>Username or Email</b></label></td><td>
+		<input type="text" placeholder="Enter Username" name="user" maxlength="32" size="32" required></td></tr>
+
+		<tr><td align="right"><label for="pass" class="loginlabel"><b>Password</b></label></td><td>
+		<input type="password" placeholder="Enter Password" name="pass" maxlength="127" size="32" required></td></tr>
+
+		<tr><td colspan=2><div class="g-recaptcha" data-sitekey="6Ld2yMMfAAAAAKamxElDogGtHDz4NZ38jB63d6yy" data-theme="dark"></div></td></tr>
+
+		<tr><td colspan=2 align="right"><input type="submit" value="Login Now!">
+		<input type="reset" value="Clear Form"></td></tr>
+
+		</table>
+		<br/>
+		( <a href="/auth/forgot">Forgot password?</a> )
+		<p/>
+		( <a href="/auth/register">Register New Account</a> )
+		</div>
+		</form>
+		</center>
+	</div>
+
+	<div class="col-4"></div>
+</div>
+
+
+<!--#include  virtual="/footer.html" -->

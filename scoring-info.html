@@ -1,0 +1,39 @@
+<div class="poiRulesContainer">
+<div class="poiRules" align="left">
+<span class="bigText">API Usage</span>
+<br/>
+<p>
+<span class="largetext boldtext">Vote scoring:</span>
+</p><p>
+The scoring system that the GEC uses may not be immediately obvious, but here is how it works. 
+The explorer's score is a number from one to ten (1-10), which starts with the average number
+of stars voted (1-5), and scales this number up to the larger range on a curve, taking the base-10 logarithm
+(exponent) of the number of votes to use as the range multipler. This is meant to keep new POIs with
+only one or two votes from immediately taking the top positions in any rankings, while earning
+"higher score" by garnering additional votes, up to the maximum theoretical score of 10 points.
+</p><p>
+In practice, this means that the very first vote will be reflected directly, with a score of 1 to 5.
+Once the POI has 10 votes, the score will be scaled half-way toward the maximum, in the range of
+1 - 7.5, reflecting the increased confidence in the scores when more votes are included. Once the
+POI has 100 or more votes, the range will reach its maximum of 1 to 10 points. At this scale, an
+average vote of 3 stars across all votes will result in a score of 5.5. If all 100 votes are 1-star,
+the score is 1. To reach a score of exactly 10, a POI must have 100 or more votes with <i><u>all of them</u></i>
+being 5-star votes.
+</p><p>
+These scales are designed to reward POIs with "better" scores in general, as they receive more
+votes and confidence in the rating increases. As long as the POI is getting voted with 3 or more
+stars more frequently than 1 or 2, the score will tend to increase until there are a few tens
+of votes, where it will gradually stabilize.
+</p><p>
+A minimum rating of 3 points is needed to be included in the interactive map. New POIs will need
+an average vote of 3 stars or more in order to hit this threshold, whereas established POIs with
+100 votes would only need an average vote of 2 or more stars.
+</p><p>
+As with everything in this project, this is subject to change, should there be enough interest
+or sufficient reason to do so. However hopefully this will help explain why the numbers increase
+beyond 5, and how they are determined.
+</p>
+</div>
+</div>
+
+

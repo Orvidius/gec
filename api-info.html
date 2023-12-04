@@ -1,0 +1,33 @@
+<div class="poiRulesContainer">
+<div class="poiRules" align="left">
+<span class="bigText">GEC API Usage</span>
+<br/>
+<p class="largetext">
+The Galactic Exploration Catalog (GEC) offers an API for access to POI
+information in applications and other websites. Here is what is available for
+you to use:
+</p><br/><p>
+<span class="largetext boldtext">Data retrieval:</span>
+<ul>
+<li>https://edastro.com/gec/json/all<br/><blockquote><p>List all POI objects, in EDSM's GMP JSON format (typos and all).</p></blockquote></li>
+<li>https://edastro.com/gec/json/combined<br/><blockquote><p>List all POI objects, in EDSM's GMP JSON format, and also include GMP entries. Please note that in this combined output, the "id" field is no longer unique. It will have to be combined with the "source" field to distinguish GEC IDs from GMP IDs.</p></blockquote></li>
+<li>https://edastro.com/gec/json/rare<br/><blockquote><p>List all "rare" POI objects, in EDSM's GMP JSON format (typos and all).</p></blockquote></li>
+<li>https://edastro.com/gec/json/single/{POI-ID}<br/><blockquote><p>Retrieve a single POI object, by ID number.</p></blockquote></li>
+<li>https://edastro.com/gec/json/id64/{id64}<br/><blockquote><p>Retrieve a single POI object, by star system ID64 number.</p></blockquote></li>
+<li>https://edastro.com/gec/json/nearest/{x}/{y}/{z}<br/><blockquote><p>Retrieve a single POI object, nearest to provided coordinates.</p></blockquote></li>
+<li>https://edastro.com/gec/json/nearest/{x}/{y}/{z}/{minrating}<br/><blockquote><p>Retrieve a single POI object, nearest to provided coordinates, and with a minimum specified explorer rating.</p></blockquote></li>
+<li>https://edastro.com/gec/json/favorites/{userID|userName}<br/><blockquote><p>Retrieve a specific user's list of favorites.</p></blockquote></li>
+<li>https://edastro.com/gec/json/categories<br/><blockquote><p>Retrieve list of currently active categories.</p></blockquote></li>
+<li>https://edastro.com/gec/json/stats<br/><blockquote><p>Retrieve totals, including counts per region and category.</p></blockquote></li>
+</ul>
+</p><br/><p>
+<span class="largetext"><span class="boldtext">Creating POIs:</span> (best if you are logged in first)</span>
+<ul>
+<li>https://edastro.com/gec/new/{systemName}<br/><blockquote><p>Start creating a new POI, with the system name pre-populated.</p></blockquote></li>
+<li>https://edastro.com/gec/new/{systemName}/{POIname}<br/><blockquote><p>Start creating a new POI, with the system name and POI name pre-populated.</p></blockquote></li>
+</ul>
+</p>
+</div>
+</div>
+
+

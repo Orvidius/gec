@@ -1,0 +1,281 @@
+
+###2023-11-14
+
+- Image link validation now allows URLs that lack the jpg/png/gif filename
+extension, as long as a header fetch resolves to one of those MIME types.
+
+###2023-11-09
+
+- Discord CDN/media no longer permitted as image source, since Discord is
+switching to temporary links only.
+
+###2023-10-04
+
+- Fixed issue with mismatched paragraph tags around inline images.
+
+###2023-08-24
+
+- Dropbox is now not accepted for uploading images, throwing an error message
+instead of downloading corrupted files. Dropbox isn't a good solution. Please
+use something else. ;)
+
+###2023-07-05
+
+- Updated the naming conventions rule.
+- Staff rating / score removed from POIs.
+- Explorer Rating colorization simplified: 
+	- Green = High enough to be included in the interactive map,
+	- Red = not sufficient for the map.
+- Colorized POI scores can be clicked on to view the scoring system explanation.
+- Scoring explanation updated to take these changes into account.
+
+###2023-06-27
+
+- Made more adjustments with how POI image local copies are saved and displayed, to improve reliability and fault tolerance.
+
+###2023-06-21
+
+- Corrected a few bugs with how POI image local copies are saved and displayed
+
+###2023-05-12
+
+- Added ability to embed Youtube videos in a description. Just paste the link
+as plain text on a line by itself in the POI description.
+
+###2023-03-13
+
+- Corrected an issue preventing unapproved POIs from showing up in the owner's
+own profile, where they would want to find it for further edits.
+
+###2023-03-05
+
+- Added a recently-seen carriers list to POI pages.
+
+###2023-02-05
+
+- Fixed a bug with email notifications for POI message threads.
+
+###2022-12-06
+
+- Formatting fix for long, non-wrapping lines of text in descriptions (such as
+URLs inserted without markdown syntax).
+
+###2022-10-25
+
+- "Nearest Neighbors" list no longer displays only one entry per system, if
+there are more than one.
+
+###2022-10-21
+
+- Fixed a bug with coordinate lookups for systems containing plus-symbols.
+
+###2022-10-07
+
+- Made some adjustments to how character counts are working when submitting
+POI text, to make the server limit more accurately reflect what the text
+editor shows.
+
+###2022-10-05
+
+- Added some dynamic meta tags for pages to have more correct inline postings
+in discord and the like.
+
+###2022-09-29
+
+- Fixed some bugs with how thumbnails and images are being stored.
+- Fleet carriers now display location information, just in case they are out
+of position from the associated POI.
+
+###2022-09-20
+
+- Images linked via the main POI form field, or inserted as gallery images,
+will now be downloaded and hosted locally. Any images placed inline to the
+description with markdown code will still be linked remotely using those links.
+
+###2022-09-08
+
+- Changed "curators" into "staff" to be more clear that they're not meant to be gatekeepers.
+
+###2022-09-05
+
+- Added sanity check to clear out a POI's secondary category if it's set equal to the primary category.
+
+###2022-08-29
+
+- Added option for curators to move POIs to different star systems.
+
+###2022-08-22
+
+- Changed some of the name detection rules for disallowing duplicate names.
+Should now permit easier importing of GMP entries, while catching more
+mistakes during an edit.
+
+###2022-07-27
+
+- Consolidated "submitted" and "on behalf" names displayed, if they are the same.
+
+###2022-07-21
+
+- Added ability to edit existing gallery images.
+
+###2022-07-18
+
+- Made POI map clickable to view location in the interactive map.
+
+###2022-07-11
+
+- Inline images in descriptions are now centered by default, if they are not as wide as the text area.
+
+###2022-07-09
+
+- Updated region-estimation algorithm.
+- Added button to user profile pages to clear/delete all favorites for yourself.
+
+###2022-07-03
+
+- Added a search option to retrieve only POIs containing a carrier callsign.
+
+###2022-06-22
+
+- Added an API call for retrieving stats/counts of POIs, region and category totals.
+
+###2022-06-19
+
+- Fixed a bug preventing "View on EDSM" button from working for system names containing apostrophes / single quotes.
+
+###2022-06-15
+
+- Added line-numbering to search results and "view all" pages.
+- Added total count to bottom of "view all" pages.
+
+###2022-06-08
+
+- Added API call to retrieve list of currently active categories.
+
+###2022-06-07
+
+- POIs can now have a secondary category.
+
+###2022-06-06
+
+- Simplistic profanity filtering added.
+- Minor adjustments on the rules/guidelines page.
+- Added Carrier Callsign field to POIs.
+
+###2022-05-31
+
+- Changed URL format to preferentially use "/gec" instead of  "/poi" (old URLs still work). 
+- Corrected some problems with roster paging and formatting.
+- Reworked discord alerting system to be (hopefully) more reliable.
+
+###2022-05-30
+
+- Added average stars and number of votes to API outputs.
+
+###2022-05-23
+
+- Added a "rare" boolean to API output.
+- Added an API call to retrieve only rare entries.
+- Adjusted "flags" column on POI list tables to line up vertically more nicely.
+
+###2022-05-19
+
+- Fixed a bug that was continuing to flag all POIs as "new" in table lists.
+- Added search checkbox to search only "rare" entries.
+- Fixed a bug with double-encoding HTML for "on behalf of"
+discoverer/submitter fields in the POI view pages.
+
+###2022-05-18
+
+- Switched from SimpleMDE to EasyMDE markdown editor. It's more recently
+maintained, and also helped solve the problem of the last line being cut off.
+
+###2022-05-17
+
+- Added a button to send search results to the interactive map.
+- Added support for Avatar images managed through Gravatar.com.
+
+###2022-05-16
+
+- First pass at adding POIs to the interactive map, starting with a few categories and minimum rating score of 3.
+- EDSM traffic report and estimated system value added.
+
+###2022-05-12
+
+- Overhauled search system, with pagination and more flexible search options.
+- Pagination for roster page.
+
+###2022-05-11
+
+- Curators can no longer vote before approving POIs.
+- Administrative account renamed from EDAstro to Official GEC.
+- Login form now accepts email address in place of username, optionally.
+- Some small security adjustments.
+
+###2022-05-10
+
+- Added session-cookie samesite/secure settings.
+- Corrected an issue preventing the search page from working properly with
+selected search terms (interference from markdown editor code).
+- Corrected POI table lists to not include unapproved POIs for non-curators.
+- Replaced the submission code for comment/reply edits and reply postings.
+(This should handle unicode and punctuation more reliably).
+
+###2022-05-09
+
+- Added visual flags for "rare" items (toggled by curators).
+- Some more encoding fixups for messages/replies.
+- Added average vote-stars display in table lists.
+- Changed link styling in several places to make them more obvious.
+- Fixed a bug preventing error messages from displaying during POI edits.
+- Added an option for curators to trigger retrieval of EDSM ID numbers if they are absent from an entry.
+
+###2022-05-08
+
+- Experimentally added average star score visuals to POI ratings.
+- Curators can edit POIs.
+- Two-stage approval process.
+- Added revision history viewer for POIs.
+- Adjusted markdown editor to (hopefully) not cut off the bottom of the POI description.
+- Fixed a bug with some punctuation causing comments/replies to cut off.
+- Improved admin-discord logging of POI comment/reply editing.
+- Added email notifications for new comments/replies in your POI or your comment thread.
+- Corrected API output to use numberic context for score and curation values, and ID numbers.
+- Added optional latitude/longitude coordinate fields for POIs (and added them to the API output).
+- Added Region, and category ID to JSON API output.
+- Added button for viewing POI system on the Canonn System Signals site.
+
+###2022-05-07
+
+- Added "combined" JSON API option.
+- Added ability to edit comments and replies.
+- Corrected an issue with greyout hanging when posting comments/replies.
+- Added revision log to POIs.
+- Added this change log.
+
+###2022-05-06
+
+- Added Lightbox image gallery popup viewer.
+- Added vote-count leaderboard.
+- Markdown editor re-added.
+- API rate limit added.
+- Preview option for creating/editing POIs.
+- Corrected session key cookies to be persistent for 30 days.
+- Added editor link for Observatory github.
+- Added scoring info page.
+
+###2022-05-05
+
+- Open BETA begins.
+- Various general web improvements such as icons and page titles.
+- Page flow improvements, "greyout", page reload timeouts for stuck inline updates.
+- Image gallery curator button functionality, promoting to POI main image.
+- Markdown editor added and then removed due to form submission issues.
+- Bugfixes for comments and replies.
+- DKIM keys & DMARC enabled for mail server.
+- Category adjustments to clarify distinction between NSPs and Stellar features.
+
+###2022-04-19 to 2022-05-04
+
+- Primary development, alpha, and closed beta.
+
