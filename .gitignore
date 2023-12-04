@@ -13,3 +13,4 @@ perl/backup
 backup
 broken-images.html
 raxxla.*
+*.orig
