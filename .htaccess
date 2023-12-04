@@ -1,0 +1,22 @@
+ErrorDocument 404 /notfound.html
+
+RewriteEngine on
+
+RewriteRule ^r/(.*)$    /cgi/redirect?id=$1
+
+RewriteRule ^sector/(.*).png$    /sectordata/$1.png	[R=301,L]
+
+RewriteRule ^sector/([A-Z]\w+)/?$    /sector/view?$1	"[L,B= ?,BNP]"
+
+RewriteRule ^gec/(.+)$	/catalog/poi?r=$1&%{QUERY_STRING} "[L,B= ?,BNP]"
+RewriteRule ^gec/?$	/catalog/poi [L]
+
+RewriteRule ^poi/(.+)$	/catalog/poi?r=$1&%{QUERY_STRING} "[L,B= ?,BNP]"
+RewriteRule ^poi/?$	/catalog/poi [L]
+
+RewriteRule ^gecdev/(.+)$	/catalog/poidev?r=$1&%{QUERY_STRING} "[L,B= ?,BNP]"
+RewriteRule ^gecdev/?$	/catalog/poidev [L]
+
+RewriteRule ^poidev/(.+)$	/catalog/poidev?r=$1&%{QUERY_STRING} "[L,B= ?,BNP]"
+RewriteRule ^poidev/?$	/catalog/poidev [L]
+
