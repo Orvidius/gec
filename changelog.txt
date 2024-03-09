@@ -1,4 +1,9 @@
 
+
+###2024-03-09
+
+- Fixed an issue with retries for failed discord push events.
+
 ###2023-11-14
 
 - Image link validation now allows URLs that lack the jpg/png/gif filename

@@ -6269,7 +6269,8 @@ sub send_discord {
 		my $tries = 0;
 		my $ret = undef;
 		while (!$ret && $tries<3) {
-			$ret = post_payload2($hook, \%json);
+			$ret = post_payload2($hook, \%json, $tries);
+			$tries++;
 		}
 		log_discord('send_discord','post failed after retries') if (!$ret);
 
@@ -6325,7 +6326,8 @@ sub alertDiscord {
 			my $tries = 0;
 			my $ret = undef;
 			while (!$ret && $tries<3) {
-				$ret = post_payload2($hook, \%json);
+				$ret = post_payload2($hook, \%json, $tries);
+				$tries++;
 			}
 			log_discord('alertDscord','post failed after retries') if (!$ret);
 
@@ -6409,7 +6411,8 @@ sub pushDiscord {
 				my $tries = 0;
 				my $ret = undef;
 				while (!$ret && $tries<3) {
-					$ret = post_payload2($hook, \%json);
+					$ret = post_payload2($hook, \%json, $tries);
+					$tries++;
 				}
 				log_discord('pushDiscord','post failed after retries') if (!$ret);
 
@@ -6465,6 +6468,7 @@ sub log_discord {
 sub post_payload2 {
 	my $url = shift;
 	my $href = shift;
+	my $tries = shift;
 
 	my $json = JSON->new->pretty->encode($href);
 
@@ -6490,9 +6494,10 @@ sub post_payload2 {
 		$ok = $response->decoded_content;
 		$ok = 1 if (!$ok);
 	} else {
-		info("Discord/post_payload2 REQUEST: ".$json);
-		info("Discord/post_payload2 ERROR: ".$response->status_line());
-		info("Discord/post_payload2 ERROR: ".$response->decoded_content);
+		info("Discord/post_payload2 [$tries] URL ".$url);
+		info("Discord/post_payload2 [$tries] REQUEST: ".$json);
+		info("Discord/post_payload2 [$tries] ERROR: ".$response->status_line());
+		info("Discord/post_payload2 [$tries] ERROR: ".$response->decoded_content);
 		print TXT epoch2date(time)." ERROR: " . $response->status_line()."\n$json\n".$response->decoded_content."\n\n" if ($debug_logging);
 	}
 
@@ -6503,8 +6508,9 @@ sub post_payload2 {
 sub post_payload {
 	my $url = shift;
 	my $href = shift;
+	my $tries = shift;
 
-	return post_payload2($url, $href);
+	return post_payload2($url, $href, $tries);
 
 	my $req = HTTP::Request->new( 'POST', $url );
 	$req->agent('Mozilla/5.0');
