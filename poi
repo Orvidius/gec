@@ -79,6 +79,8 @@ my $licenseLINK	= '<a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">
 
 my $db		= 'edastro';
 my $baseURL	= 'https://edastro.com';
+my $cdn		= 'https://edastro.b-cdn.net';
+
 #my $relativeURL	= "/poi";
 my $relativeURL	= "/gec"; #"/poi";
 my $DEV = $0 =~ /poidev/ || /gecdev/ ? 1 : 0;
@@ -1221,8 +1223,8 @@ sub json_format_POI {
 			galMapUrl=>edsm_link($$r{edsm_id},$$r{systemname}),
 			coordinates=>[($$r{coord_x}+0,$$r{coord_y}+0,$$r{coord_z}+0)],
 			summary=>$$r{summary},
-			descriptionMardown=>$$r{description},
-			descriptionHtml=>$$r{descriptionHTML},
+			descriptionMardown=>cdn_links($$r{description},1,1),
+			descriptionHtml=>cdn_links($$r{descriptionHTML},1),
 			solDistance=>$$r{sol_dist}+0,
 			id64=>$$r{id64},
 			rating=>$$r{score}+0,
@@ -1230,7 +1232,7 @@ sub json_format_POI {
 			avgStars=>$$r{stars}+0,
 			votes=>$$r{votes}+0,
 			poiUrl=>"$scriptURL/view/$$r{ID}",
-			mainImage=>get_poi_image($$r{ID},$r),	#$$r{toplocalimage} ? $$r{toplocalimage} : $$r{topimage},
+			mainImage=>cdn(get_poi_image($$r{ID},$r)),	#$$r{toplocalimage} ? $$r{toplocalimage} : $$r{topimage},
 			callsign=>$$r{callsign}
 			);
 
@@ -1251,7 +1253,9 @@ sub json_format_POI {
 	}
 	}
 
-	$hash{mainImage} = "$baseURL$hash{mainImage}" if ($hash{mainImage} !~ /^https?/);
+	my $mainURL = $cdn ? $cdn : $baseURL;
+
+	$hash{mainImage} = "$mainURL$hash{mainImage}" if ($hash{mainImage} !~ /^https?/);
 
 	if ($$r{source}) {
 		$hash{source} = $$r{source};
@@ -3614,7 +3618,7 @@ sub view {
 				$text  .= "<br/>" if ($text !~ /<\/?(p|br)>\s*$/is);
 				$text  .= "<br/>" if ($$f{name} eq 'summary');
 
-				$html .= "<tr><td class=\"poiViewCell\" colspan=\"2\"><div class=\"textjustify textoverflow\">$label$text</div></td></tr>\n";
+				$html .= "<tr><td class=\"poiViewCell\" colspan=\"2\"><div class=\"textjustify textoverflow\">$label".cdn_links($text)."</div></td></tr>\n";
 			} else {
 				$html .= "<tr><td class=\"poiViewCell\" colspan=\"2\"><div><label for=\"\">$$f{label}</label>:<br/>".
 				"<textarea class=\"poiTEXT\" name=\"$$f{name}\" rows=\"$$f{rows}\" cols=\"$$f{cols}\" ".
@@ -3652,11 +3656,11 @@ sub view {
 			#$html .= "IMAGE: ($$f{name} / $$f{value} || $params{mainimage} || $params{toplocalimage})\n";
 
 			if ($$f{name} eq 'topimage' && $params{mainimage}) {
-				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"$mainimage\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"$mainimage\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
+				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"".cdn($mainimage)."\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"".cdn($mainimage)."\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
 			} elsif ($$f{name} eq 'topimage' && $params{toplocalimage}) {
-				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"$params{toplocalimage}\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"$params{toplocalimage}\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
+				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"".cdn($params{toplocalimage})."\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"".cdn($params{toplocalimage})."\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
 			} else {
-				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"$$f{value}\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"$$f{value}\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
+				$html .= "<tr><td colspan=2 id=\"poiMainImageContainer\"><center><a id=\"poiMainImageLink\" href=\"".cdn($$f{value})."\" data-lightbox=\"poiImage$poiID\" data-title=\"$params{name} main image\"><img src=\"".cdn($$f{value})."\" width=$width id=\"poiMainImage\"></a></center></td></tr>\n";
 			}
 		}
 	}
@@ -3788,6 +3792,34 @@ sub revision_history {
 	return $html;
 }
 
+sub cdn_links {
+	my $html = shift;
+	my $add_base = shift;
+	my $use_markdown = shift;
+
+	my $base = $cdn ? $cdn : $baseURL;
+
+	if ($cdn || $add_base) {
+		$html =~ s/<img\s+src="\/poiimages\//<img src="$base\/poiimages\//g if (!$use_markdown);
+		$html =~ s/\]\(\/poiimages\//\]\($base\/poiimages\//g if ($use_markdown);
+	}
+
+	return $html;
+}
+
+
+sub cdn {
+	my $url = shift;
+
+	return $url if (!$cdn);
+
+	if ($url !~ /^https?:/ && $url =~ /^\//) {
+		return $cdn.$url;
+	}
+
+	return $url;
+}
+
 sub view_images {
 	my $poiID = shift;
 	my $returnHTML = shift;
@@ -3866,8 +3898,8 @@ sub galleryImageHTML {
 	}
 
 	$html .= "<div class=\"poiGalleryImageContainer $hidden\">".
-		"<a href=\"$url\" data-lightbox=\"galleryImage$galID\" data-title=\"$title\">".
-		"<img src=\"$thumb\" alt=\"$title\" class=\"poiGalleryImage\"><br/>".
+		"<a href=\"".cdn($url)."\" data-lightbox=\"galleryImage$galID\" data-title=\"$title\">".
+		"<img src=\"".cdn($thumb)."\" alt=\"$title\" class=\"poiGalleryImage\"><br/>".
 		"<span class=\"galleryTitle\">$title<br/></span></a>".
 		"<span class=\"galleryNote\">Uploaded by <a href=\"$relativeURL/profile/$ownerID\">$owner</a>$note</span>".
 		"$admin</div>\n";
@@ -6262,7 +6294,7 @@ sub send_discord {
 	$json{content} = $msg;
 	$json{embeds} = $aref if (ref($aref) eq 'ARRAY' && @$aref);
 
-	my @emb = db_mysql($db,"select * from discords where public=0 and sendmsgs>0"); # non-public and detail-showing channels
+	my @emb = db_mysql($db,"select * from discords where public=0 and sendmsgs>0 and disabled is null"); # non-public and detail-showing channels
 	foreach my $e (@emb) {
 		my $hook = $$e{webhook};
 
@@ -6313,7 +6345,7 @@ sub alertDiscord {
 	}
 
 	if ($sessionUserID && isAdmin()) {
-		my @emb = db_mysql($db,"select * from discords where sendlogs>0");	# non-public and detail-showing channels
+		my @emb = db_mysql($db,"select * from discords where sendlogs>0 and disabled is null");	# non-public and detail-showing channels
 
 		my %json = ();
 		$json{username} = 'EDAstro';
@@ -6403,7 +6435,7 @@ sub pushDiscord {
 			$where = 'where sendapproved>0' if ($approved);
 			$where = 'where sendnew>0' if ($newsubmission);
 		
-			my @emb = db_mysql($db,"select * from discords $where");
+			my @emb = db_mysql($db,"select * from discords $where and disabled is null");
 			foreach my $e (@emb) {
 				my $hook = $$e{webhook};
 				my ($id,$token) = discord_tokens($hook);

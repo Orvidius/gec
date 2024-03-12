@@ -3797,8 +3797,11 @@ sub cdn_links {
 	my $add_base = shift;
 	my $use_markdown = shift;
 
-	if ($cdn) {
-		$html =~ s/<img\s+src="\/poiimages\//<img src="$cdn\/poiimages\//g;
+	my $base = $cdn ? $cdn : $baseURL;
+
+	if ($cdn || $add_base) {
+		$html =~ s/<img\s+src="\/poiimages\//<img src="$base\/poiimages\//g if (!$use_markdown);
+		$html =~ s/\]\(\/poiimages\//\]\($base\/poiimages\//g if ($use_markdown);
 	}
 
 	return $html;

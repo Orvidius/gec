@@ -1,5 +1,11 @@
 
 
+###2024-03-12
+
+- Added support for CDN for images.
+- Added full https URLs for JSON API output in descriptions.
+- Added option to disable specific discord webhooks.
+
 ###2024-03-09
 
 - Fixed an issue with retries for failed discord push events.
