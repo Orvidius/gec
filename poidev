@@ -44,6 +44,8 @@ my $BETA		= 0;
 my $BETA_closed 	= 0;
 my $DEV_skip_discord	= 1;
 
+my $cdn			= 'https://edastro.b-cdn.net';
+
 my $admin_title		= 'staff'; # people
 my $admin_titles	= 'staff'; # curators
 my $admin_scores	= 'staff'; # curation
@@ -6262,7 +6264,7 @@ sub send_discord {
 	$json{content} = $msg;
 	$json{embeds} = $aref if (ref($aref) eq 'ARRAY' && @$aref);
 
-	my @emb = db_mysql($db,"select * from discords where public=0 and sendmsgs>0"); # non-public and detail-showing channels
+	my @emb = db_mysql($db,"select * from discords where public=0 and sendmsgs>0 and disabled is null"); # non-public and detail-showing channels
 	foreach my $e (@emb) {
 		my $hook = $$e{webhook};
 
@@ -6313,7 +6315,7 @@ sub alertDiscord {
 	}
 
 	if ($sessionUserID && isAdmin()) {
-		my @emb = db_mysql($db,"select * from discords where sendlogs>0");	# non-public and detail-showing channels
+		my @emb = db_mysql($db,"select * from discords where sendlogs>0 and disabled is null");	# non-public and detail-showing channels
 
 		my %json = ();
 		$json{username} = 'EDAstro';
@@ -6403,7 +6405,7 @@ sub pushDiscord {
 			$where = 'where sendapproved>0' if ($approved);
 			$where = 'where sendnew>0' if ($newsubmission);
 		
-			my @emb = db_mysql($db,"select * from discords $where");
+			my @emb = db_mysql($db,"select * from discords $where and disabled is null");
 			foreach my $e (@emb) {
 				my $hook = $$e{webhook};
 				my ($id,$token) = discord_tokens($hook);
