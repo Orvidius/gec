@@ -1934,7 +1934,7 @@ sub change_detail {
 			render($html,'Change POI System');
 			exit;
 		} else {
-			db_mysql($db,"update poi set systemname=?,id64=?,region=?,coord_x=?,coord_y=?,coord_z=?,edsm_id where ID=?",
+			db_mysql($db,"update poi set systemname=?,id64=?,region=?,coord_x=?,coord_y=?,coord_z=?,edsm_id=? where ID=?",
 					[($$href{systemname},$$href{id64},$$href{region},$$href{coord_x},$$href{coord_y},$$href{coord_z},$$href{edsm_id},$id)]);
 
 			record_editlog($id);

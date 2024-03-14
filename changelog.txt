@@ -1,5 +1,9 @@
 
 
+###2024-03-14
+
+- Fixed a bug with moving a POI entry to a different star system.
+
 ###2024-03-12
 
 - Added support for CDN for images.
