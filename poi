@@ -1788,7 +1788,7 @@ sub get_edsmValue {
 			}
 		};
 	} else {
-		info("GET-edsmID ERROR: " . $response->status_line().' - '.$response->decoded_content);
+		info("GET-edsmID ERROR [$poiID]: " . $response->status_line().' - '.$response->decoded_content);
 	}
 	return {};
 }
@@ -1812,7 +1812,7 @@ sub get_edsmID {
 		};
 		info("GET-edsmID failed, no ID") if (!$edsmID);
 	} else {
-		info("GET-edsmID ERROR: " . $response->status_line().' - '.$response->decoded_content);
+		info("GET-edsmID ERROR [$poiID]: " . $response->status_line().' - '.$response->decoded_content);
 	}
 
 	if ($edsmID && $edsmID>0) {
