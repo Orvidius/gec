@@ -3476,8 +3476,8 @@ sub view {
 
 	push @form, {type=>'hr'};
 	push @form, {type=>'blank'};
-	push @form, {type=>'text', name=>'id64', label=>'ID64 Address', maxlength=>40, size=>40, value=>$params{id64}, required=>1, disabled=>1};
-	push @form, {type=>'text', name=>'edsm_id', label=>'EDSM ID', maxlength=>40, size=>40, value=>$params{edsm_id}, required=>1, disabled=>1};
+	push @form, {type=>'text', name=>'id64', label=>'ID64 Address', maxlength=>40, size=>40, value=>$params{id64}, required=>1, disabled=>1, link=>"https://spansh.co.uk/api/dump/<VALUE>" };
+	push @form, {type=>'text', name=>'edsm_id', label=>'EDSM ID', maxlength=>40, size=>40, value=>$params{edsm_id}, required=>1, disabled=>1, link=>"https://www.edsm.net/en/system/id/<VALUE>/name/$params{systemname}" };
 
 	my $ui = "<tr><td colspan=2 align=\"right\">\n";
 
@@ -3627,6 +3627,11 @@ sub view {
 		} elsif ($$f{type} eq 'text' || $$f{type} eq 'display' || $$f{type} eq 'callsign') {
 			my $val = filter($$f{value});
 			$val = commify($val) if ($$f{commify});
+			if ($$f{link}) {
+				my $url = $$f{link};
+				$url =~ s/<VALUE>/$val/gs;
+				$val = "<a href=\"$url\">$val</a>";
+			}
 			$html .= "<tr><td class=\"poiViewCell\" align=\"right\" valign=\"top\"><b>$$f{label}:</b></td>".
 					"<td class=\"poiViewCell\" valign=\"top\">$val</td></tr>\n";
 

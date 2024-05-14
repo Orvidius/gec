@@ -1,5 +1,10 @@
 
 
+###2024-05-14
+
+- EDSM ID and ID64 fields are now clickable links, to view the POI's star
+system in EDSM and in a Spansh dump, respectively. 
+
 ###2024-03-14
 
 - Fixed a bug with moving a POI entry to a different star system.
