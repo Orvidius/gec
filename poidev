@@ -5885,7 +5885,7 @@ sub lookup_table {
 	my $rows = rows_mysql($db,"select * from $table");
 
 	foreach my $r (@$rows) {
-		$$href{$$r{$key}} = $$r{$string};
+		$$href{$$r{$key}} = $$r{$string} if (!$$r{deleted});
 		if ($aref && $access) { $$aref{$$r{$key}} = $$r{$access}; }
 		$avail_category{$$r{$key}} = $$r{$string} if ($table eq 'categories' && !$$r{deleted});
 	}
