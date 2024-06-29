@@ -1181,13 +1181,13 @@ sub json_output {
 		}
 
 		$rows = rows_mysql('edastro',"select distinct catname,count(*) as num from poi,categories where categories.ID=catID and poi.deleted is null ".
-				"and approved is not null group by catname order by catname");
+				"and approved is not null group by catname order by catname and categories.deleted=0");
 		foreach my $r (@$rows) {
 			$$href{category}{primary}{$$r{catname}} = $$r{num}+0;
 		}
 
 		$rows = rows_mysql('edastro',"select distinct catname,count(*) as num from poi,categories where catID2 is not null and ".
-				"categories.ID=catID2 and poi.deleted is null and approved is not null group by catname order by catname");
+				"categories.ID=catID2 and poi.deleted is null and approved is not null group by catname order by catname and categoies.deleted=0");
 		foreach my $r (@$rows) {
 			$$href{category}{secondary}{$$r{catname}} = $$r{num}+0;
 		}
@@ -3638,7 +3638,7 @@ sub view {
 		} elsif ($$f{type} eq 'categories') {
 			$html .= "<tr><td class=\"poiViewCell\" align=\"right\" valign=\"top\"><b>$$f{label}:</b></td><td class=\"poiViewCell\" valign=\"top\">";
 
-			my @rows = db_mysql($db,"select * from categories where ID=?",[($$f{value})]);
+			my @rows = db_mysql($db,"select * from categories where ID=? and deleted=0",[($$f{value})]);
 			if (@rows) {
 				$html .= "<a href=\"$relativeURL/category/$$f{value}\">".filter(${$rows[0]}{catname})."</a>";
 			}

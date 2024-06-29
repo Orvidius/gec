@@ -1,5 +1,9 @@
 
 
+###2024-06-29
+
+- Corrected a bug that would allow searching by categories that no longer exist.
+
 ###2024-05-14
 
 - EDSM ID and ID64 fields are now clickable links, to view the POI's star
