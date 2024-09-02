@@ -1957,7 +1957,7 @@ sub approve {
 		if (!$action) {
 
 			db_mysql($db,"update poi set approved=NOW() where ID=? and approved is null",[($poiID)]);
-			alertDiscord('APPROVED: '.getPOIname($poiID), $poiID);
+			alertDiscord('APPROVED: '.getPOIname($poiID), $poiID, {'approval'=>1});
 			pushDiscord($poiID,'Newly approved POI',undef,1,0,1);
 	
 			clearCache("$cachePath/Recently_added_POIs");
@@ -1968,13 +1968,13 @@ sub approve {
 		} elsif ($action eq 'abort') {
 
 			db_mysql($db,"update poi set requestapprove=null where ID=? and requestapprove is not null",[($poiID)]);
-			alertDiscord('Approval request ABORTED: '.getPOIname($poiID), $poiID);
+			alertDiscord('Approval request ABORTED: '.getPOIname($poiID), $poiID, {'approval'=>1});
 			redirect($scriptURL.'/view/'.$poiID);
 
 		} elsif ($action eq 'request') {
 
 			db_mysql($db,"update poi set requestapprove=now() where ID=? and requestapprove is null",[($poiID)]);
-			alertDiscord('Approval requested: '.getPOIname($poiID), $poiID);
+			alertDiscord('Approval requested: '.getPOIname($poiID), $poiID, {'approval'=>1});
 			redirect($scriptURL.'/view/'.$poiID);
 
 		} else {
@@ -2061,14 +2061,14 @@ sub do_delete {
 	if ($action eq 'abortdelete' && $confirm =~ /^\s*abort\s*/i) {
 
 			db_mysql($db,"update poi set requestdelete=null where ID=?",[($poiID)]);
-			alertDiscord('DELETION ABORTED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID);
+			alertDiscord('DELETION ABORTED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID, {'deletion'=>1});
 			emailNotice($params{ownerID},$poiID,'removed from pending deletion','an opportunity to continue');
 			render_info('Deletion Aborted');
 
 	} elsif ($action eq 'undelete' && $confirm =~ /^\s*restore\s*/i) {
 
 			db_mysql($db,"update poi set deleted=null where ID=?",[($poiID)]);
-			alertDiscord('Un-deletion RESTORED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID);
+			alertDiscord('Un-deletion RESTORED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID, {'deletion'=>1});
 			emailNotice($params{ownerID},$poiID,'restored from deletion','an opportunity to continue');
 			render_info('Restored from Deletion');
 
@@ -2077,12 +2077,12 @@ sub do_delete {
 
 		if ($action eq 'delete') {
 			db_mysql($db,"update poi set deleted=NOW() where ID=?",[($poiID)]);
-			alertDiscord('DELETED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID);
+			alertDiscord('DELETED: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID, {'deletion'=>1});
 			emailNotice($params{ownerID},$poiID,'deleted','having uncorrected issues');
 			render_info('Deletion Completed');
 		} else {
 			db_mysql($db,"update poi set requestdelete=NOW() where ID=?",[($poiID)]);
-			alertDiscord('REQUESTED DELETE: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID);
+			alertDiscord('REQUESTED DELETE: '.getPOIname($poiID).' ('.getUsername(getOwner($poiID)).')', $poiID, {'deletion'=>1});
 			emailNotice($params{ownerID},$poiID,'marked for deletion','having uncorrected issues');
 			render_info('Deletion Requested');
 		}
@@ -2279,7 +2279,7 @@ sub report {
 
 		if ($sessionUserID && isAdmin()) {
 			db_mysql($db,"update poi set reported=null where ID=?",[($poiID)]);
-			alertDiscord('UN-REPORTED: '.$poiName.' ('.getUsername($ownerID).')', $poiID);
+			alertDiscord('UN-REPORTED: '.$poiName.' ('.getUsername($ownerID).')', $poiID, {'reported'=>1});
 			redirect("$scriptURL/view/$poiID");
 		}
 
@@ -2294,7 +2294,7 @@ sub report {
 
 			db_mysql($db,"update poi set reported=now() where ID=?",[($poiID)]);
 
-			alertDiscord('REPORTED: '.$poiName.' ('.getUsername($ownerID).')', $poiID);
+			alertDiscord('REPORTED: '.$poiName.' ('.getUsername($ownerID).')', $poiID, {'reported'=>1});
 
 			render_error("Report saved. <a href=\"$scriptURL/view/$poiID\">Click here to return to ".htmlify($poiName)."</a>");
 
@@ -6335,6 +6335,7 @@ sub send_discord {
 sub alertDiscord {
 	my $message = shift;
 	my $poiID = shift;
+	my $flags = shift;
 	my @embeds = ();
 
 	return if ($DEV && $DEV_skip_discord);
@@ -6349,8 +6350,15 @@ sub alertDiscord {
 		}
 	}
 
+	my $field = 'sendlogs';
+	if ($flags && ref($flags) eq 'HASH') {
+		$field = 'senddeletionreqs' if ($$flags{deletion});
+		$field = 'sendapprovalreqs' if ($$flags{approval});
+		$field = 'sendreportedreqs' if ($$flags{reported});
+	}
+
 	if ($sessionUserID && isAdmin()) {
-		my @emb = db_mysql($db,"select * from discords where sendlogs>0 and disabled is null");	# non-public and detail-showing channels
+		my @emb = db_mysql($db,"select * from discords where $field>0 and disabled is null");	# non-public and detail-showing channels
 
 		my %json = ();
 		$json{username} = 'EDAstro';
