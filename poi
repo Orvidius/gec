@@ -7072,7 +7072,11 @@ sub nonbreaking {
 }
 
 sub my_markdown {
-	my $string = markdown(filter(shift));
+	my $raw = shift;
+
+	$raw =~ s/[ \t]+(!\[[^\]]*\]\(https?)/$1/gs;
+
+	my $string = markdown(filter($raw));
 	my $remove_white = shift;
 
 	$string =~ s/<(\/)?(pre|code)>//gs;

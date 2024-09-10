@@ -1,4 +1,7 @@
 
+###2024-09-10
+
+- Corrected an issue with spaces preceding markdown inline images.
 
 ###2024-06-29
 
