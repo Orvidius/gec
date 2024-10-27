@@ -1,4 +1,8 @@
 
+###2024-10-26
+
+- Changed wording on the form for POI submissions, concerning staff edits.
+
 ###2024-09-10
 
 - Corrected an issue with spaces preceding markdown inline images.

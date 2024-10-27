@@ -5497,7 +5497,7 @@ sub new_entry_form {
 	push @form, {type=>'text', name=>'systemname', label=>'Star System Name', maxlength=>64, size=>40, value=>$params{systemname}, required=>1};
 	push @form, {type=>'agreement', name=>'agreed', label=>'I accept', labelextra=>"the [<a href=\"$scriptURL/rules\">Rules and Terms of Service</a>]", value=>1, required=>1};
 	push @form, {type=>'agreement', name=>'license', label=>'Entry will be licensed', labelextra=>"[$licenseLINK]", value=>1, required=>1};
-	push @form, {type=>'agreement', name=>'editing', label=>'I understand that '.$admin_people.' may edit my entry for formatting and other minor corrections', labelextra=>"", value=>1, required=>1};
+	push @form, {type=>'agreement', name=>'editing', label=>'I understand that '.$admin_people.' may edit my entry for formatting, minor corrections, and sometimes more extensively for content where it is deemed necessary', labelextra=>"", value=>1, required=>1};
 
 	make_form('new','',\@form,$error,@req);
 }
