@@ -3532,6 +3532,9 @@ sub view {
 			if (isAdmin() && $params{requestdelete} && !$params{deleted});  # LEVEL 2
 	$ui .= "<input type=\"button\" class=\"poiButton poiButtonRed\" value=\"UN-DELETE\" onclick=\"greyout();location.href='$scriptURL/undelete/$poiID';\"/>\n" 
 			if (isAdmin() && $params{deleted});  # LEVEL 2
+	
+	my $html_title = encode_entities($params{name});
+	$ui .= "<input type=\"button\" class=\"poiButton poiButton\" value=\"🦋\" onclick=\"location.href='https://bsky.app/intent/compose?text=$html_title%0Ahttps%3A//edastro.com/gec/view/$poiID';\"/>\n";
 
 	$ui .= "</td></tr>\n";
 
