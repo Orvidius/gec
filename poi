@@ -7084,6 +7084,8 @@ sub my_markdown {
 	my $string = markdown(filter($raw));
 	my $remove_white = shift;
 
+	$string =~ s/\x{c2}\x{b0}/\&deg;/gs;
+
 	$string =~ s/<(\/)?(pre|code)>//gs;
 	$string =~ s/([^>\s])\r?\n/$1<br\/>\n/gs;
 	$string =~ s/(\r?\n){2,}/\n/gs;
@@ -7165,6 +7167,7 @@ sub convert_qmarks {
 	$string =~ s/<<SLASH>>/\//gs;
 	return $string;
 }
+
 
 sub filter {
 	my $s = shift;

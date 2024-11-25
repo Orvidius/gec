@@ -1,5 +1,9 @@
 
 
+###2024-11-24
+
+- Added correction for HTML encoding the &deg; degree symbol.
+
 ###2024-11-19
 
 - Added Bluesky sharing links
