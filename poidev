@@ -3457,6 +3457,7 @@ sub view {
 	if ($params{mainimage}) {
 		$mainimage = htmlify(getImageLink($params{mainimage}));
 	}
+	$params{description} = unicode_correct($params{description});
 	
 	if ($visible) {
 
@@ -5151,6 +5152,8 @@ sub update_entry {
 			$error = "Field \"$v\" must be no shorter than $minlength{$v} characters in length (".commify($len)." submitted).";
 		}
 	}
+
+	$data{description} = unicode_correct($data{description});
 
 	my $descripHTML = my_markdown($data{description});
 
