@@ -473,7 +473,7 @@ sub frontpage {
    <p align=\"left\" class=\"textjustify\">
 Welcome to the Galactic Exploration Catalog (GEC) on EDAstro, and thank you for sharing your interesting, beautiful, rare, and exceptional discoveries for your fellow Commanders to enjoy! Please review the <a href=\"$scriptURL/rules\">submission guidelines and rating suggestions</a> before submitting or rating a Point of Interest (POI). Get in touch with the GEC team <a href=\"$discordlink\">on our discord</a> with any questions, concerns, or just to say hi. Otherwise, we'll see you in The Black, CMDR!
 	<br/><br/>
-	[<a href=\"https://bsky.app/intent/compose?text=I%27m%20navigating%20through%20the%20GEC%20exploration%20catalog%21%20%F0%9F%A6%8B%0Ahttps%3A//edastro.com/gec/exploring\">Share on Bluesky🦋</a>]
+	[<a href=\"https://bsky.app/intent/compose?text=I%27m%20navigating%20through%20the%20GEC%20exploration%20catalog%21%20%F0%9F%A6%8B%0Ahttps%3A//edastro.com/gec/exploring\">Share on Bluesky <img src=\"/images/bluesky15px.png\" border=0 alt=\"Bluesky\" style=\"border: 0\"></a>]
    </p><br/><br/>
 ";
 
@@ -3534,7 +3534,7 @@ sub view {
 			if (isAdmin() && $params{deleted});  # LEVEL 2
 	
 	my $html_title = encode_entities($params{name});
-	$ui .= "<input type=\"button\" class=\"poiButton poiButton\" value=\"🦋\" onclick=\"location.href='https://bsky.app/intent/compose?text=$html_title%0Ahttps%3A//edastro.com/gec/view/$poiID';\"/>\n";
+	$ui .= "<button  class=\"poiButton poiButton\" onclick=\"location.href='https://bsky.app/intent/compose?text=$html_title%0Ahttps%3A//edastro.com/gec/view/$poiID';\"><img src=\"/images/bluesky15px.png\" border=0 alt=\"Bluesky\" style=\"border: 0\"></button>\n";
 
 	$ui .= "</td></tr>\n";
 
@@ -7085,6 +7085,7 @@ sub my_markdown {
 	my $remove_white = shift;
 
 	$string =~ s/\x{c2}\x{b0}/\&deg;/gs;
+	$string =~ s/\x{e2}\x{80}\x{99}/\&apos;/gs;
 
 	$string =~ s/<(\/)?(pre|code)>//gs;
 	$string =~ s/([^>\s])\r?\n/$1<br\/>\n/gs;

@@ -1,4 +1,9 @@
 
+###2024-12-28
+
+- Updated Bluesky buttons to use actual logo instead of unicode butterfly.
+- Fixed a right-single-quote unicode character to encode into HTML in
+descriptions.
 
 ###2024-11-24
 
