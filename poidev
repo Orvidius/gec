@@ -7085,6 +7085,7 @@ sub my_markdown {
 	my $remove_white = shift;
 
 	$string =~ s/\x{c2}\x{b0}/\&deg;/gs;
+	$string =~ s/\x{2e}\x{80}\x{99}/\&apos;/gs;
 
 	$string =~ s/<(\/)?(pre|code)>//gs;
 	$string =~ s/([^>\s])\r?\n/$1<br\/>\n/gs;

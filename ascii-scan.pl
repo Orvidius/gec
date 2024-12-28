@@ -38,12 +38,25 @@ use HTML qw(print_html red_print);
 die "Usage: $0 <poiID>\n" if (!@ARGV);
 
 foreach my $poiID (@ARGV) {
+	my @rows = db_mysql('edastro','select * from poi where ID=?',[($poiID)]);
+
+	my $summary = '';
+	foreach my $r (@rows) {
+		$summary =  $$r{summary};
+	}
+
 	my @rows = db_mysql('edastro','select * from poidata where poiID=?',[($poiID)]);
 
 	foreach my $r (@rows) {
-		my @array = ( $$r{description} =~ m/./g );
-		foreach my $c (@array) {
-			printf("%s -- %4x\n",$c,ord($c));
+		$$r{summary} = $summary;
+
+		foreach my $var (qw(summary description)) {
+
+			print "\n".uc($var).":\n";
+			my @array = ( $$r{$var} =~ m/./g );
+			foreach my $c (@array) {
+				printf("%s -- %4x\n",$c,ord($c));
+			}
 		}
 	}
 }
