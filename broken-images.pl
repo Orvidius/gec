@@ -14,7 +14,7 @@ use LWP::Simple;
 use LWP::UserAgent;
 use POSIX qw(floor strftime);
 
-use lib "perl";
+use lib "/var/www/edastro.com/perl";
 use ATOMS qw(btrim epoch2date date2epoch);
 use DB qw(rows_mysql db_mysql $print_queries show_queries);
 
