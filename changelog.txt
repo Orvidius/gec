@@ -1,4 +1,10 @@
 
+###2025-01-26
+
+- Added a check to remove the GMP banner from a POI, if that GMP POI contains
+a link referring back to the same GEC POI.
+- Score of 2 no longer carries a red coloration on the scorecard.
+
 ###2024-12-28
 
 - Updated Bluesky buttons to use actual logo instead of unicode butterfly.

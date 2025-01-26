@@ -2975,7 +2975,8 @@ sub ratingBox {
 #	$color = 'Yellow' if ($rating >= 4);
 #	$color = 'YellowGreen' if ($rating >= 5);
 #	$color = 'Green'  if ($rating >= 6);
-	$color = 'Green'  if ($rating >= 3);
+	$color = 'Yellow' if ($rating >= 1.5);
+	$color = 'Green'  if ($rating >= 2);
 
 	$small = 'Small' if ($small);
 
@@ -3591,7 +3592,7 @@ sub view {
 
 		} elsif ($$f{type} eq 'GMP') {
 
-			$html .= getGMPwarning($params{systemname},'view');
+			$html .= getGMPwarning($params{systemname},'view',$params{ID});
 
 		} elsif ($$f{type} eq 'ui') {
 
@@ -4995,15 +4996,33 @@ sub nearestNeighbors {
 }
 
 sub getGMPwarning {
-	my $name = shift;
-	my $type = shift;
-	my @rows = db_mysql($db,"select id,name,galMapSearch,galMapUrl,type from GMP where galMapSearch=?",[($name)]);
-	my $html = '';
+	my $name  = shift;
+	my $type  = shift;
+	my $poiID = shift;
+	my @rows  = db_mysql($db,"select id,name,galMapSearch,galMapUrl,type,descriptionMardown from GMP where galMapSearch=?",[($name)]);
+	my $html  = '';
+
 
 	my $class = $type =~ /edit|new/i ? ' gmpWarningRed' : '';
 
 	if (@rows) {
 		my $r = shift @rows;
+	
+		if (0) { # See if GMP entry points back to same star system
+			while ($$r{descriptionMardown} =~ /https?:[\\\/]+edastro\.com[\\\/]+gec[\\\/]+view[\\\/]+(\d+)/ig) {
+				my @data =  db_mysql($db,"select systemname from poi where ID=?",[($1)]);
+				if (@data) {
+					my $d = shift @data;
+					return '' if (btrim(uc($$d{systemname})) eq btrim(uc($$r{galMapSearch})));
+				}
+			}
+		}
+
+		if (1) { # See if GMP entry contains link referring back to this POI
+			if ($$r{descriptionMardown} =~ /https?:[\\\/]+edastro\.com[\\\/]+gec[\\\/]+view[\\\/]+$poiID($|\D)/ig) {
+				return '';
+			}
+		}
 
 		foreach my $k (keys %$r) {
 			$$r{$k} = htmlify($$r{$k}) if ($k ne 'name');	# Name already encoded in the DB
@@ -5466,9 +5485,9 @@ sub update_entry_form {
 
 	if ($params{action} eq 'new') {
 		$html .= "<p align=\"left\">Note: POI is not created yet. If you leave this page, the new POI will be aborted.</p>\n";
-		$html .= getGMPwarning($params{systemname},'new');
+		$html .= getGMPwarning($params{systemname},'new',$params{ID});
 	} else {
-		$html .= getGMPwarning($params{systemname},'edit');
+		$html .= getGMPwarning($params{systemname},'edit',$params{ID});
 	}
 
 	my $count = countPOIs($params{systemname},$params{ID});
