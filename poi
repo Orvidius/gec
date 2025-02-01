@@ -2976,7 +2976,7 @@ sub ratingBox {
 #	$color = 'YellowGreen' if ($rating >= 5);
 #	$color = 'Green'  if ($rating >= 6);
 	$color = 'Yellow' if ($rating >= 1.5);
-	$color = 'Green'  if ($rating >= 2);
+	$color = 'Green'  if ($rating >= 3);
 
 	$small = 'Small' if ($small);
 
