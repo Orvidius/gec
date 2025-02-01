@@ -1,4 +1,8 @@
 
+###2025-02-01
+
+- Added a submission tutorial accessible from the new submission form.
+
 ###2025-01-26
 
 - Added a check to remove the GMP banner from a POI, if that GMP POI contains

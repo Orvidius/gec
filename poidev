@@ -2370,7 +2370,7 @@ sub rules {
 }
 
 sub tutorial {
-	render(file_html('/www/edastro.com/catalog/tos.html','',1).file_html('/www/edastro.com/catalog/tutorial.html','',1),'Submission Tutorial');
+	render(file_html('/www/edastro.com/catalog/tutorial.html','',1),'Submission Tutorial');
 }
 
 sub show_tos {
