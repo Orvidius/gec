@@ -3194,7 +3194,7 @@ sub rating_include {
 
 	my $html = "<center>\n";
 
-	my $favButtonClass = '';
+	my $favButtonClass = ' class="floatRight"';
 
 	#$html .= "<div data-star=\"".sprintf("%.1f",$$r{stars})."\"></div><br/>\n";	# Was testing this
 	
@@ -3202,20 +3202,31 @@ sub rating_include {
 
 	my $explorer = $aprilFools ? 'Real Explorers' : 'Explorer Rating';
 
+	if ($sessionUserID && $sessionUserID != $templateID) {
+		$html .= "<div$favButtonClass><input type=\"button\" class=\"poiButton\" onclick=\"toggleFavorite();\" value=\"Add to Favorites\"></div>\n" if (!@isFav);
+		$html .= "<div$favButtonClass><span class=\"textgreen\">\&#10004;\&nbsp;Favorite\&nbsp;<input type=\"button\" class=\"poiButton\" onclick=\"toggleFavorite();\" value=\"Remove\"></div>\n" if (@isFav);
+	}
+
+	$html .= "<div class=\"votespreadBox\" cellpadding=\"1\" cellspacing=\"1\">\n";
+	$html .= "<table>";
+	foreach (1..5) {
+		$html .= "<tr><td><div data-smallstar=\"".sprintf("%.1f",$_)."\" class=\"bigText\"></div></td><td>\&nbsp;\&nbsp;</td><td style=\"text-align: right;\">".commify($votecounts{$_}+0)."</td></tr>\n";
+	}
+	$html .= "</table>";
+	$html .= "</div>\n";
+
 	if (!$sessionUserID || !$sessionDATA{canVote} || (!$allow_self_votes && $sessionUserID == $$r{ownerID}) || !$$r{approved}) {
+
 		#$html .= "<span class=\"textred\">Not logged in</span><br/>\n" if ($DEV && !$sessionUserID);
 		#$html .= "<span class=\"textyellow\">DEV: $sessionUserID,$sessionDATA{canVote},$$r{ownerID},$$r{approved}</span><br/>\n" if ($DEV);
-		$html .= "<div class=\"floatLeft\"><div class=\"poiProfileName textRight\"><div data-star=\"".sprintf("%.1f",$$r{stars})."\" class=\"bigText\"></div>\&nbsp;<span class=\"normaltext\">$explorer<br/></span><span class=\"mediumtext\">(".commify($$r{votes})." votes, $$r{stars} avg.stars)</span></div>\n";
+		$html .= "<div class=\"floatLeft\"><div class=\"poiProfileName textRight\">\&nbsp;\&nbsp;\&nbsp;<div data-star=\"".sprintf("%.1f",$$r{stars})."\" class=\"bigText\"></div>\&nbsp;<span class=\"normaltext\">$explorer<br/></span><span class=\"mediumtext\">(".commify($$r{votes})." votes, $$r{stars} avg.stars)</span></div>\n";
 		$html .= "<div class=\"poiProfileRating\">".ratingBox($$r{score},1)."</div></div>\n";
 		#$html .= "<div class=\"poiProfileRating\">".ratingBox($$r{cscore},1)."</div>\n";
 		#$html .= "<div class=\"poiProfileName textLeft\"><span class=\"normaltext\">$admin_SCORES Rating\&nbsp;<div data-star=\"".sprintf("%.1f",$cstars)."\" class=\"bigText\"></div><br/></span><span class=\"mediumtext\">(".commify($$r{curations})." votes, $cstars avg.stars)</span></div>\n";
-		$favButtonClass = '';
 	} else {
 
-
-		$favButtonClass = ' class="floatRight"';
 		$html .= "<div class=\"ratingContainer\">\n";
-		$html .= "<div class=\"ratingList textRight\" style=\"white-space:nowrap; margin-right: 30px;\">\n";
+		$html .= "<div class=\"ratingList textRight\" style=\"white-space:nowrap;\">\n";
 		$html .= "<div class=\"ratingSingle\">\n";
 		$html .= "<div class=\"poiProfileName\"><div data-star=\"".sprintf("%.1f",$$r{stars})."\" class=\"bigText\"></div>\&nbsp;<span class=\"normaltext\">$explorer<br/></span><span class=\"mediumtext\">(".commify($$r{votes})." votes, $$r{stars} avg.stars)</span></div>\n";
 		$html .= "<div class=\"poiProfileRating\">".ratingBox($$r{score},1)."</div>\n";
@@ -3225,6 +3236,7 @@ sub rating_include {
 		#$html .= "<div class=\"poiProfileRating\">".ratingBox($$r{cscore},1)."</div>\n";
 		#$html .= "</div>\n";
 		$html .= "</div>\n";
+		$html .= "<br/>\n";
 
 		my %sel = ();
 		my @rows = db_mysql($db,"select * from votes where voterID=? and poiID=?",[($sessionUserID,$poiID)]);
@@ -3244,7 +3256,7 @@ sub rating_include {
 #		if ($sessionUserID && $sessionDATA{canVote} && ($allow_self_votes || $sessionUserID != $$r{ownerID}) && $$r{approved}) {
 
 			#$html .= "<div class=\"voteBox\">Your vote: <span class=\"voteStars\">&#9734;&#9734;&#9734;&#9734;&#9734;</span></div>\n";
-			$html .= "<div class=\"voteBox\">YOUR VOTE<br/><div class=\"voteStars\">
+			$html .= "<div class=\"voteBox floatRight\">YOUR VOTE<br/><div class=\"voteStars\">
     <form>
 	<div class=\"rating\">";
 
@@ -3284,23 +3296,6 @@ sub rating_include {
 #		}
 
 		$html .= "</div>\n";
-	}
-
-	$html .= "<div class=\"votespreadBox\" cellpadding=\"1\" cellspacing=\"1\">\n";
-	$html .= "<table>";
-	foreach (1..5) {
-		$html .= "<tr><td><div data-star=\"".sprintf("%.1f",$_)."\" class=\"bigText\"></div></td><td>\&nbsp;\&nbsp;</td><td style=\"text-align: right;\">".commify($votecounts{$_}+0)."</td></tr>\n";
-	}
-	$html .= "</table>";
-	$html .= "</div>\n";
-
-	if ($sessionUserID && $sessionUserID != $templateID) {
-#		$html .= "<div><input type=\"button\" onclick=\"greyout();location.href='$relativeURL/favorite/$poiID'\" value=\"Add to Favorites\"></div>\n" if (!@isFav);
-#		$html .= "<div><span class=\"textgreen\">\&#10004;\&nbsp;Favorite\&nbsp;<input type=\"button\" onclick=\"greyout();location.href='$relativeURL/favorite/$poiID'\" value=\"Remove\"></div>\n" if (@isFav);
-
-
-		$html .= "<div$favButtonClass><input type=\"button\" class=\"poiButton\" onclick=\"toggleFavorite();\" value=\"Add to Favorites\"></div>\n" if (!@isFav);
-		$html .= "<div$favButtonClass><span class=\"textgreen\">\&#10004;\&nbsp;Favorite\&nbsp;<input type=\"button\" class=\"poiButton\" onclick=\"toggleFavorite();\" value=\"Remove\"></div>\n" if (@isFav);
 	}
 
 	$html .= "</center>\n";

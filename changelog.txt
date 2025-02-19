@@ -1,4 +1,8 @@
 
+###2025-02-19
+
+- Added a breakdown of the star votes on each POI page.
+
 ###2025-02-01
 
 - Added a submission tutorial accessible from the new submission form.
