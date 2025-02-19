@@ -3161,12 +3161,20 @@ sub rating_include {
 	my @req   = @_;
 	my $vote  = $q->param('vote');
 	$vote = $req[0] if (!$vote && $req[0] =~ /^[1-5]$/);
+
+	my %votecounts = ();
 	
 	print $q->header("text/html;charset=UTF-8") if (!$debug);
 	#print html_header() if (!$debug);
 
 	if ($vote && $sessionUserID && $sessionDATA{canVote} && getPOIname($poiID)) {
 		vote($poiID,$vote);
+	}
+
+
+	my @rows = db_mysql($db,"select score,count(*) as count from votes where poiID=? group by score order by score",[($poiID)]);
+	foreach my $r (@rows) {
+		$votecounts{$$r{score}} = $$r{count};
 	}
 
 	my @rows = db_mysql($db,"select score,cscore,ownerID,votes,curations,stars,approved from poi where ID=?",[($poiID)]);
@@ -3277,6 +3285,15 @@ sub rating_include {
 
 		$html .= "</div>\n";
 	}
+
+	$html .= "<div class=\"votespreadBox\" cellpadding=\"1\" cellspacing=\"1\">\n";
+	$html .= "<table>";
+	foreach (1..5) {
+		$html .= "<tr><td><div data-star=\"".sprintf("%.1f",$_)."\" class=\"bigText\"></div></td><td>\&nbsp;\&nbsp;</td><td style=\"text-align: right;\">".commify($votecounts{$_}+0)."</td></tr>\n";
+	}
+	$html .= "</table>";
+	$html .= "</div>\n";
+
 	if ($sessionUserID && $sessionUserID != $templateID) {
 #		$html .= "<div><input type=\"button\" onclick=\"greyout();location.href='$relativeURL/favorite/$poiID'\" value=\"Add to Favorites\"></div>\n" if (!@isFav);
 #		$html .= "<div><span class=\"textgreen\">\&#10004;\&nbsp;Favorite\&nbsp;<input type=\"button\" onclick=\"greyout();location.href='$relativeURL/favorite/$poiID'\" value=\"Remove\"></div>\n" if (@isFav);
