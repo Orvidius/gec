@@ -2,6 +2,7 @@
 ###2025-02-19
 
 - Added a breakdown of the star votes on each POI page.
+- Split out the GEC and GMP "Nearest Neighbors" list into separate tables.
 
 ###2025-02-01
 

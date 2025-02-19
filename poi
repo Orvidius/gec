@@ -4937,28 +4937,33 @@ sub nearestNeighbors {
 	my $p = shift;	# Params for starting point
 	my $html = '';
 
-	my @rows = db_mysql($db,"select 'GEC' as source,ID,name,systemname,score,sqrt(pow(coord_x-?,2) + pow(coord_y-?,2) + pow(coord_z-?,2)) as distance ".
-			"from poi where ID!=? and hidden is null and approved is not null and deleted is null and ".
-			" coord_x is not null and coord_y is not null and coord_z is not null order by distance limit 10",
-			[($$p{coord_x},$$p{coord_y},$$p{coord_z},$poiID)]);
-
-	push @rows, db_mysql($db,"select 'GMP' as source,name,galMapSearch as systemname,galMapUrl,".
-				"sqrt(pow(coord_x-?,2) + pow(coord_y-?,2) + pow(coord_z-?,2)) as distance from GMP ".
-				"where galMapSearch is not null and coord_x is not null and coord_y is not null and coord_z is not null ".
-				"order by distance limit 10", [($$p{coord_x},$$p{coord_y},$$p{coord_z})]);
-
-	my @list = ();
-	my %seen = ();
-	$seen{uc(btrim($$p{systemname}))} = 1;
-
-	foreach my $r (@rows) {
-		push @list, $r ;# if (!$seen{uc(btrim($$r{systemname}))});
-		$seen{uc(btrim($$r{systemname}))} = 1;
-	}
+#	my @list = ();
+#	my %seen = ();
+#	$seen{uc(btrim($$p{systemname}))} = 1;
+#
+#	foreach my $r (@rows) {
+#		push @list, $r ;# if (!$seen{uc(btrim($$r{systemname}))});
+#		$seen{uc(btrim($$r{systemname}))} = 1;
+#	}
 
 	my $widthadd = ' style="width:480px"';
 
-	$html .= "<div class=\"poiTableContainer\"$widthadd><p class=\"poiTableTitle\" align=\"left\"><b>Nearest Neighbors:</b>";
+	$html .= "<div class=\"poiTableContainer\"$widthadd>\n";
+
+	foreach my $catalog ('GEC','GMP') {
+		my @rows = ();
+
+		@rows = db_mysql($db,"select 'GEC' as source,ID,name,systemname,score,sqrt(pow(coord_x-?,2) + pow(coord_y-?,2) + pow(coord_z-?,2)) as distance ".
+			"from poi where ID!=? and hidden is null and approved is not null and deleted is null and ".
+			" coord_x is not null and coord_y is not null and coord_z is not null order by distance limit 10",
+			[($$p{coord_x},$$p{coord_y},$$p{coord_z},$poiID)]) if ($catalog eq 'GEC');
+
+		@rows = db_mysql($db,"select 'GMP' as source,name,galMapSearch as systemname,galMapUrl,".
+				"sqrt(pow(coord_x-?,2) + pow(coord_y-?,2) + pow(coord_z-?,2)) as distance from GMP ".
+				"where galMapSearch is not null and coord_x is not null and coord_y is not null and coord_z is not null ".
+				"order by distance limit 10", [($$p{coord_x},$$p{coord_y},$$p{coord_z})]) if ($catalog eq 'GMP');
+
+	$html .= "<p class=\"poiTableTitle\" align=\"left\"><b>Nearest $catalog Neighbors:</b>";
 	#$html .= " ($poiID: $$p{coord_x} / $$p{coord_y} / $$p{coord_z})";
 	$html .= "</p>\n";
 	$html .= "<table class=\"nearestTable\"$widthadd>\n";
@@ -4968,14 +4973,14 @@ sub nearestNeighbors {
 	$html .= "<th class=\"poiTableHeader\">\&nbsp;System\&nbsp;</th></tr>\n";
 	my $i = 0;
 	my $n = 0;
-	foreach my $r (sort { $$a{distance} <=> $$b{distance} } @list) {
+	foreach my $r (sort { $$a{distance} <=> $$b{distance} } @rows) {
 		$i = 1 - $i;
 		my $class = $i ? 'poiRow1' : 'poiRow2';
 		$$r{systemname} = $$r{galMapSearch} if ($$r{galMapSearch} && !$$r{systemname});
 		my $align = '';
 		my %disp = %$r;
 
-		$disp{name} = "[GMP] $disp{name}" if ($$r{source} eq 'GMP');
+		#$disp{name} = "[GMP] $disp{name}" if ($$r{source} eq 'GMP');
 
 		$disp{name} = substr($disp{name},0,26).'...' if (length($disp{name})>29);
 		$disp{systemname} = substr($disp{systemname},0,17).'...' if (length($disp{systemname})>20);
@@ -5011,6 +5016,9 @@ sub nearestNeighbors {
 	}
 	
 	$html .= "</table>\n";
+
+	}
+
 	$html .= "</div><!poiTableContainer>\n"; #poiTableContainer
 	return $html;
 }
