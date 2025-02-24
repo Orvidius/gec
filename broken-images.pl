@@ -135,13 +135,14 @@ sub binaryGET {
 		$referer = $1;
 		#$url .= "?dl=1" if ($url !~ /dl=1$/);
 	}
+	$referer = 'https://edastro.com' if (!$referer);
 
 	if ($url =~ /^https:\/\/media\.discordapp\.net\/attachments\/\d+\/\d+\/\S+?\.(png|gif|jpg|jpeg)\?.+/) {
 		$url =~ s/\?.+$//s;
 	}
 
 	#my $response = $ua->get($url, "Accept"=>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", Referer=>$referer, Host=>$host);
-	my $response = $ua->get($url, "Accept"=>"image/avif,image/webp,*/*", Referer=>$referer, Host=>$host,
+	my $response = $ua->get($url, "Accept"=>"image/webp,image/jpeg,image/png,image/gif,*/*", Referer=>$referer, Host=>$host,
 		"Cache-Control"=>"no-cache", Pragma=>"no-cache", "Sec-Fetch-Dest"=>"image", "Sec-Fetch-Mode"=>"no-cors", "Sec-Fetch-Site"=>"same-site");
 
 	if ($response->is_success) {
@@ -152,6 +153,7 @@ sub binaryGET {
 		return length($bin_data);
 	} elsif ($response->status_line =~ /^429/ && $url =~ /^(https?:\/\/(i\.)?imgur\.com\/([\w\d]+\.(png|jpg|jpeg|gif)))(\?\S+)?$/i) {
 		my ($link, $i, $fn, $ext) = ($1, $2, $3, $4);
+		print "FAIL: $url (".$response->status_line.")\n";
 		#my $exec = "( /usr/bin/ssh -p 222 www\@reaper.necrobones.net 'curl $link' > $outfile ) 2>\&1";
 
 		$link =~ s/\/imgur.com\//\/i.imgur.com\//s if (!$i);
@@ -162,6 +164,16 @@ sub binaryGET {
 		system($exec);
 		return (stat($outfile))[7];
 	} else {
+
+		if ($url =~ /^(https?:\/\/[\w\-\.\/]+\.(png|jpg|gif))$/) {
+			unlink $outfile if (-e $outfile);
+			system('/usr/bin/curl','-o',$outfile,$url);
+			if (-e $outfile) {
+				return (stat($outfile))[7];
+			}
+		}
+
+		print "FAIL: $url (".$response->status_line.")\n";
 		return undef;
 	}
 	return 0;
