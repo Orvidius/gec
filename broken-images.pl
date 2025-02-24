@@ -114,8 +114,60 @@ if (!@ARGV) {
 exit;
 
 
-
 sub binaryGET {
+	my $url = shift;
+	my $outfile = shift;
+	my $retry = shift;
+	my $tag = shift;
+
+	my $referer = '';
+	my $host = '';
+
+	if ($url =~ /^https?:\/\/([\w\d\-\.]+)\//) {
+		$host = $1;
+	}
+
+	my $ua = LWP::UserAgent->new;
+	#$ua->agent('Mozilla/5.0');
+	$ua->agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/109.0");
+
+	if ($url =~ /^(https:\/\/i\.postimg\.cc\/[\w\d]+)\//i) {
+		$referer = $1;
+		#$url .= "?dl=1" if ($url !~ /dl=1$/);
+	}
+
+	if ($url =~ /^https:\/\/media\.discordapp\.net\/attachments\/\d+\/\d+\/\S+?\.(png|gif|jpg|jpeg)\?.+/) {
+		$url =~ s/\?.+$//s;
+	}
+
+	#my $response = $ua->get($url, "Accept"=>"text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8", Referer=>$referer, Host=>$host);
+	my $response = $ua->get($url, "Accept"=>"image/avif,image/webp,*/*", Referer=>$referer, Host=>$host,
+		"Cache-Control"=>"no-cache", Pragma=>"no-cache", "Sec-Fetch-Dest"=>"image", "Sec-Fetch-Mode"=>"no-cors", "Sec-Fetch-Site"=>"same-site");
+
+	if ($response->is_success) {
+		my $bin_data = $response->decoded_content;
+		open DATA, '>:raw', $outfile or return 0;
+		print DATA $bin_data;
+		close DATA;
+		return length($bin_data);
+	} elsif ($response->status_line =~ /^429/ && $url =~ /^(https?:\/\/(i\.)?imgur\.com\/([\w\d]+\.(png|jpg|jpeg|gif)))(\?\S+)?$/i) {
+		my ($link, $i, $fn, $ext) = ($1, $2, $3, $4);
+		#my $exec = "( /usr/bin/ssh -p 222 www\@reaper.necrobones.net 'curl $link' > $outfile ) 2>\&1";
+
+		$link =~ s/\/imgur.com\//\/i.imgur.com\//s if (!$i);
+
+		my $exec = "/usr/bin/ssh -p 222 www\@reaper.necrobones.net 'curl $link' > $outfile 2>/dev/null";
+		#info($exec);
+		#info(split /[\r\n]+/s, `$exec`);
+		system($exec);
+		return (stat($outfile))[7];
+	} else {
+		return undef;
+	}
+	return 0;
+}
+
+sub binaryGET_orig {
 	my $url = shift;
 	my $outfile = shift;
 
