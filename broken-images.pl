@@ -23,15 +23,25 @@ my $timeout	= 30;
 
 $SIG{ALRM} = sub { die "timeout"; };
 
-open HTML, ">/www/edastro.com/catalog/broken-images-tmp.html";
-print HTML "<h3>Broken images</h3><p/>Updated: ".epoch2date(time)."<p/>\n";
-print HTML "<table>\n";
+if (!@ARGV) {
+	open HTML, ">/www/edastro.com/catalog/broken-images-tmp.html";
+	print HTML "<h3>Broken images</h3><p/>Updated: ".epoch2date(time)."<p/>\n";
+	print HTML "<table>\n";
+}
 
 my $found = 0;
 
 my @rows = db_mysql($db,"select ID,name,topimage,toplocalimage,mainimage,mainimagehidden from poi where deleted is null");
 foreach my $r (@rows) {
 	my %images = ();
+
+	next if ($ARGV[0] && $$r{ID} != $ARGV[0]);
+
+	my $desc = '';
+	my @data = db_mysql($db,"select description from poidata where poiID=?",[($$r{ID})]);
+	if (@data) {
+		$desc = ${$data[0]}{description};
+	}
 
 	my $link = $$r{toplocalimage} ? $$r{toplocalimage} : $$r{topimage};
 	$link = "https://edastro.com$link" if ($link =~ /^\//);
@@ -43,6 +53,13 @@ foreach my $r (@rows) {
 		my $img = $$i{localimage} ? $$i{localimage} : $$i{imagelink};
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		$images{$$r{ID}}{$img} = $$i{title};
+	}
+
+	while ($desc =~ /\((https?:\/\/([^\)]+\.(jpg|png|gif)(\?[^\)*])?))\)/ig) {
+		my $img = $1;
+		$img = "https://edastro.com$img" if ($img =~ /^\//);
+		#print "Test: $img\n";
+		$images{$$r{ID}}{$img} = $img;
 	}
 
 	foreach my $poiID (sort {$a<=>$b} keys %images) {
@@ -78,7 +95,7 @@ foreach my $r (@rows) {
 			if (!$ok) {
 				print "ERROR: /gec/$poiID ($$r{name}) - $url ($name)\n";
 
-				print HTML "<tr><td align=\"right\">$poiID\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"/gec/view/$poiID\">$$r{name}</a></td><td>\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"$url\">$name</a></td></tr>\n";
+				print HTML "<tr><td align=\"right\">$poiID\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"/gec/view/$poiID\">$$r{name}</a></td><td>\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"$url\">$name</a></td></tr>\n" if (!@ARGV);
 				$found++;
 			}
 		}
@@ -86,11 +103,13 @@ foreach my $r (@rows) {
 	
 }
 
-print HTML "NONE\n" if (!$found);
-print HTML "</table>\n";
-close HTML;
+if (!@ARGV) {
+	print HTML "NONE\n" if (!$found);
+	print HTML "</table>\n";
+	close HTML;
 
-system('/usr/bin/mv','/www/edastro.com/catalog/broken-images-tmp.html','/www/edastro.com/catalog/broken-images.html');
+	system('/usr/bin/mv','/www/edastro.com/catalog/broken-images-tmp.html','/www/edastro.com/catalog/broken-images.html');
+}
 
 exit;
 
