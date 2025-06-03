@@ -5027,7 +5027,7 @@ sub getGMPwarning {
 	my $name  = shift;
 	my $type  = shift;
 	my $poiID = shift;
-	my @rows  = db_mysql($db,"select id,name,galMapSearch,galMapUrl,type,descriptionMardown from GMP where galMapSearch=?",[($name)]);
+	my @rows  = db_mysql($db,"select id,name,galMapSearch,galMapUrl,type,descriptionMardown from GMP where galMapSearch=? and descriptionMardown is not null and descriptionMardown!=''",[($name)]);
 	my $html  = '';
 
 

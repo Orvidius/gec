@@ -1,4 +1,10 @@
 
+
+###2025-06-03
+
+- Filtering out descriptionless GMP entries from "This entry shares a system
+with..." notices.
+
 ###2025-02-19
 
 - Added a breakdown of the star votes on each POI page.
