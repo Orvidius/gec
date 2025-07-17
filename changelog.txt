@@ -1,5 +1,10 @@
 
 
+###2025-07-17
+
+- Fixed and issue with displaying original discoverer for staff memeber
+submissions.
+
 ###2025-06-03
 
 - Filtering out descriptionless GMP entries from "This entry shares a system

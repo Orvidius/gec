@@ -3580,9 +3580,9 @@ sub view {
 			my $and = '';
 
 			if ($behalf && $params{discoverer}) {
-				$maintainer =~ /^(\s*cmdr\s+)?(\S.*)$/i;
+				$maintainer =~ /^(\s*cmdr\s+)?(\S.*?)(\s+\*\s*)$/i;
 				my $ownerName = $2;
-				$params{discoverer} =~ /^(\s*cmdr\s+)?(\S.*)$/i;
+				$params{discoverer} =~ /^(\s*cmdr\s+)?(\S.*?)(\s+\*\s*)$/i;
 				my $discName = $2;
 
 				if (lc(btrim($ownerName)) eq lc(btrim($discName))) {
