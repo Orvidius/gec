@@ -1964,7 +1964,9 @@ sub approve {
 
 			db_mysql($db,"update poi set approved=NOW() where ID=? and approved is null",[($poiID)]);
 			alertDiscord('APPROVED: '.getPOIname($poiID), $poiID, {'approval'=>1});
-			pushDiscord($poiID,'Newly approved POI',undef,1,0,1);
+			if (!isHidden($poiID)) {
+				pushDiscord($poiID,'Newly approved POI',undef,1,0,1);
+			}
 	
 			clearCache("$cachePath/Recently_added_POIs");
 			clearCache("$cachePath/Unrated_and_few-vote_POIs_needing_votes");
@@ -6079,6 +6081,19 @@ sub countHidden {
 		return ${$rows[0]}{num};
 	}
 	return 0;
+}
+
+sub isHidden {
+	my $poiID = shift;
+
+	return undef if (!$poiID);
+
+	my @rows = db_mysql($db,"select count(*) as num from poi where ID=? and deleted is null and hidden is null",[($poiID)]);
+
+	if (@rows) {
+		return 0;
+	}
+	return 1;
 }
 
 sub countDeleted {

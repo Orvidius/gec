@@ -1,5 +1,9 @@
 
 
+###2025-07-28
+
+- "Newly approved POI" discord alerts suppressed for hidden approvals.
+
 ###2025-07-17
 
 - Fixed and issue with displaying original discoverer for staff memeber
