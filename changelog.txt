@@ -1,5 +1,10 @@
 
 
+###2025-08-06
+
+- Corrected an issue with displaying discoverer names alongside the
+submitter's name. Bug introduced with the July 17 adjustment.
+
 ###2025-07-28
 
 - "Newly approved POI" discord alerts suppressed for hidden approvals.
