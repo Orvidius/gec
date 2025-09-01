@@ -5509,7 +5509,7 @@ sub update_entry_form {
 		$error = '' if ($error eq '<PREVIEW>');
 	}
 	push @form, {type=>'textarea', name=>'observatory', label=>'<a href="https://github.com/Xjph/ObservatoryCore/releases" target="_blank">Observatory</a> Details (optional)', maxlength=>$maxlength{observatory}, cols=>80, rows=>8, value=>$params{observatory}};
-	push @form, {type=>'textarea', name=>'journal', label=>'Relevant Journal Entries (optional)', maxlength=>$maxlength{journal}, cols=>80, rows=>8, value=>$params{journal}};
+	push @form, {type=>'textarea', name=>'journal', label=>'Relevant Game Log Data (optional)', maxlength=>$maxlength{journal}, cols=>80, rows=>8, value=>$params{journal}};
 
 	my $html = '';
 
