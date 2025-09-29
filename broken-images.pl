@@ -55,7 +55,7 @@ foreach my $r (@rows) {
 		$images{$$r{ID}}{$img} = $$i{title};
 	}
 
-	while ($desc =~ /\((https?:\/\/([^\)]+\.(jpg|png|gif)(\?[^\)*])?))\)/ig) {
+	while ($desc =~ /\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)/ig) {
 		my $img = $1;
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		#print "Test: $img\n";
@@ -80,7 +80,7 @@ foreach my $r (@rows) {
 				eval {
 					alarm($timeout);
 					eval {
-						warn "Testing [$tries] $url ($name)\n";
+						warn "Testing $$r{ID} [$tries] $url ($name)\n";
 						alarm($timeout);
 						unlink $tmp if (-e $tmp);
 						$bytes = binaryGET($url,$tmp);
