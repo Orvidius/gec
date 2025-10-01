@@ -55,7 +55,7 @@ foreach my $r (@rows) {
 		$images{$$r{ID}}{$img} = $$i{title};
 	}
 
-	while ($desc =~ /[!|\!]\[[^\]]*\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)/ig) {
+	while ($desc =~ /[!|\!]\[[^\]]*\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
 		my $img = $1;
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		#print "Test: $img\n";
