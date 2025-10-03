@@ -25,7 +25,7 @@ my $convert     = '/usr/local/bin/convert';
 
 my $db		= 'edastro';
 my $timeout	= 30;
-my $debug	= 0;
+my $debug	= 1;
 
 $SIG{ALRM} = sub { die "timeout"; };
 
@@ -62,7 +62,9 @@ foreach my $r (@rows) {
 		$images{$$r{ID}}{$img} = $$i{title};
 	}
 
-	while ($desc =~ /[!|\!]\[([^\]]*)\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
+# ![ABC 2](https://storage.googleapis.com/canonn-downloads/screenshots/Plua%20Chruia%20LG-Y%20d15/Plua%20Chruia%20LG-Y%20d15_(ABC%202)_LCU%20No%20Fool%20Like%20One_00001.png)
+#
+	while ($desc =~ /[!|\!]\[([^\]]*)\]\((https?:\/\/(.+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
 		my $title = $1;
 		my $img = $2;
 		$title = $img if (!$title);
