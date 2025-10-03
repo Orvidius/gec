@@ -34,6 +34,7 @@ my $found = 0;
 my @rows = db_mysql($db,"select ID,name,topimage,toplocalimage,mainimage,mainimagehidden from poi where deleted is null");
 foreach my $r (@rows) {
 	my %images = ();
+	my %from_desc = ();
 
 	next if ($ARGV[0] && $$r{ID} != $ARGV[0]);
 
@@ -55,11 +56,14 @@ foreach my $r (@rows) {
 		$images{$$r{ID}}{$img} = $$i{title};
 	}
 
-	while ($desc =~ /[!|\!]\[[^\]]*\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
-		my $img = $1;
+	while ($desc =~ /[!|\!]\[([^\]]*)\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
+		my $title = $1;
+		$title = $img if (!$title);
+		my $img = $2;
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		#print "Test: $img\n";
-		$images{$$r{ID}}{$img} = $img;
+		$images{$$r{ID}}{$img} = $title;
+		$from_desc{$$r{ID}}{$img} = 1;
 	}
 
 	foreach my $poiID (sort {$a<=>$b} keys %images) {
@@ -90,7 +94,6 @@ foreach my $r (@rows) {
 				};
 				$ok = ($bytes || (-e $tmp && (stat($tmp))[7])) ? 1 : 0;
 			}
-			unlink $tmp if (-e $tmp);
 
 			if (!$ok) {
 				print "ERROR: /gec/$poiID ($$r{name}) - $url ($name)\n";
@@ -99,7 +102,14 @@ foreach my $r (@rows) {
 				$found++;
 			} else {
 				print " * OK: /gec/$poiID ($$r{name}) - $url ($name)\n";
+
+				# Add to gallery here
+				if ($from_desc{$url} && $url !~ /^https?:\/\/edastro.com\//) {
+					add_gallery($poiID,$tmp,$url,$name);
+				}
 			}
+
+			unlink $tmp if (-e $tmp);
 		}
 	}
 	
@@ -115,6 +125,17 @@ if (!@ARGV) {
 
 exit;
 
+#############################################################################
+
+sub add_gallery {
+	my ($poiID,$tmp,$url,$name) = @_;
+
+	return;
+
+	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
+
+
+}
 
 sub binaryGET {
 	my $url = shift;
