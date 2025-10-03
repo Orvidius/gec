@@ -4,7 +4,7 @@ use strict; $|=1;
 use utf8;
 use feature qw( unicode_strings );
 
-use CGI::Carp qw(fatalsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser);
 
 use HTML::Entities;
 use Encode;
@@ -60,8 +60,8 @@ foreach my $r (@rows) {
 
 	while ($desc =~ /[!|\!]\[([^\]]*)\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
 		my $title = $1;
-		$title = $img if (!$title);
 		my $img = $2;
+		$title = $img if (!$title);
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		#print "Test: $img\n";
 		$images{$$r{ID}}{$img} = $title;
@@ -106,7 +106,7 @@ foreach my $r (@rows) {
 				print " * OK: /gec/$poiID ($$r{name}) - $url ($name)\n";
 
 				# Add to gallery here
-				if ($from_desc{$url} && $url !~ /^https?:\/\/edastro.com\//) {
+				if ($from_desc{$poiID}{$url} && $url !~ /^https?:\/\/edastro.com\//) {
 					add_gallery($poiID,$tmp,$url,$name);
 				}
 			}
@@ -132,12 +132,12 @@ exit;
 sub add_gallery {
 	my ($poiID,$tmp,$url,$name) = @_;
 
-	return;
-
 #	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
 my $id = 0;
 	my $ext_line = `file $tmp`;
 	chomp $ext_line;
+
+	print "\t^ File: $ext_line\n";
 
 	my $ext_orig = undef;
 	if ($ext_line =~ /(PNG|JPG|JPEG|GIF) image data/i) {
@@ -145,7 +145,7 @@ my $id = 0;
 		$ext_orig =~ s/jpeg/jpg/;
 	}
 
-	$ext_new = $ext_orig;
+	my $ext_new = $ext_orig;
 	$ext_new = 'jpg' if ($ext_orig =~ /(jpg|jpeg|png)/);
 
 	return undef if (!$ext_new);
@@ -157,6 +157,8 @@ my $id = 0;
 	my $loc   = "/www/edastro.com$path";
 	my $file  = "$loc/$fn";
 	my $uri   = "$path/$fn";
+
+	print "\t^ Create: $file\n";
 
 	quiet_system('/usr/bin/mkdir','-p',$loc) if (!-d $loc);
 
