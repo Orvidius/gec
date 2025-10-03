@@ -133,8 +133,55 @@ sub add_gallery {
 	return;
 
 	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
+	my $ext_line = `file $tmp`;
+	chomp $ext_line;
 
+	my $ext_orig = undef;
+	if ($ext_line =~ /(PNG|JPG|JPEG|GIF) image data/i) {
+		$ext_orig = lc($1);
+		$ext_orig =~ s/jpeg/jpg/;
+	}
 
+	$ext_new = $ext_orig;
+	$ext_new = 'jpg' if ($ext_orig =~ /(jpg|jpeg|png)/);
+
+	return undef if (!$ext_new);
+
+	my $pid = sprintf("%09u",$id);
+	$pid =~ /(\d{3})(\d{3})(\d{3})/;
+	my $path  = "/poiphotos/$1/$2";
+	my $fn    = "$3.$ext_new";
+	my $loc   = "/www/edastro.com$path";
+	my $file  = "$loc/$fn";
+	my $uri   = "$path/$fn";
+
+	quiet_system('/usr/bin/mkdir','-p',$loc) if (!-d $loc);
+
+	my $add = $ext_orig eq 'gif' ? '[0]' : '';
+
+	if ($ext_new =~ /png/i || $ext_new ne $ext_orig) {
+		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file);	# local image
+		info("Converted $tmp to $file") if (-e $file);
+		info("Convert FAILED $tmp to $file") if (!-e $file);
+	} else {
+		move($tmp,$file);						     # local image
+		info("Moved $tmp to $file") if (-e $file);
+		info("Move FAILED $tmp to $file") if (!-e $file);
+	}
+
+	unlink $tmp if (-e $tmp);
+
+	# Need to update the gallery entry with the local file and URL
+	# Also need to update the description + descriptionHTML with the new URL
+}
+
+sub quiet_system {
+	# https://perldoc.perl.org/perlfaq8#How-can-I-capture-STDERR-from-an-external-command%3f
+	my @ok = ();
+	open( EXEC, "-|", @_);
+	chomp(@ok = <EXEC>);
+	close EXEC;
+	return @ok;
 }
 
 sub binaryGET {
