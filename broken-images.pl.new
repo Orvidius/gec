@@ -20,8 +20,12 @@ use ATOMS qw(btrim epoch2date date2epoch);
 use DB qw(rows_mysql db_mysql $print_queries show_queries);
 use AUTH qw(info);
 
+my $mkdir       = '/usr/bin/mkdir';
+my $convert     = '/usr/local/bin/convert';
+
 my $db		= 'edastro';
 my $timeout	= 30;
+my $debug	= 0;
 
 $SIG{ALRM} = sub { die "timeout"; };
 
@@ -132,8 +136,9 @@ exit;
 sub add_gallery {
 	my ($poiID,$tmp,$url,$name) = @_;
 
-#	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
-my $id = 0;
+
+	my $id = 0;
+	$id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]) if (!$debug);
 	my $ext_line = `file $tmp`;
 	chomp $ext_line;
 
@@ -158,6 +163,15 @@ my $id = 0;
 	my $file  = "$loc/$fn";
 	my $uri   = "$path/$fn";
 
+	if ($name eq $url) {
+		$name =~ s/.*\///s;
+		if (length($name) > 15) {
+			$name = "$id.$ext_new";
+		}
+	}
+
+	$uri .= '?'.time;
+
 	print "\t^ Create: $file\n";
 
 	quiet_system('/usr/bin/mkdir','-p',$loc) if (!-d $loc);
@@ -165,11 +179,11 @@ my $id = 0;
 	my $add = $ext_orig eq 'gif' ? '[0]' : '';
 
 	if ($ext_new =~ /png/i || $ext_new ne $ext_orig) {
-#		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file);	# local image
+		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file) if (!$debug);	# local image
 		info("Converted $tmp to $file") if (-e $file);
 		info("Convert FAILED $tmp to $file") if (!-e $file);
 	} else {
-#		move($tmp,$file);						     # local image
+		move($tmp,$file) if (!$debug);						     # local image
 		info("Moved $tmp to $file") if (-e $file);
 		info("Move FAILED $tmp to $file") if (!-e $file);
 	}
@@ -178,7 +192,7 @@ my $id = 0;
 
 	# Also need to update the description + descriptionHTML with the new URL
 
-#	db_mysql($db,"update gallery set localimage=? where ID=?",[($uri.'?'.time,$id)]);
+	db_mysql($db,"update gallery set localimage=? where ID=?",[($uri,$id)]) if (!$debug);
 
 	my @rows = db_mysql($db,"select description,descriptionHTML from poidata where poiID=?",[($poiID)]);
 	foreach my $r (@rows) {
@@ -188,7 +202,10 @@ my $id = 0;
 		$html =~ s/\Q$url\E/$uri/gs;
 
 		if ($desc ne $$r{description} || $html ne $$r{descriptionHTML}) {
-#			db_mysql($db,"update poidata set description=?,descriptionHTML=? where poiID=?",[($dec,$html,$poiID)]);
+			#print "DESC: $desc\n\nHTML: $html\n\n";
+			print "\t^ Update: $poiID desc/HTML for $name\n";
+			db_mysql($db,"update poidata set description=?,descriptionHTML=? where poiID=?",[($desc,$html,$poiID)]) if (!$debug);
+			db_mysql($db,"update gallery set title=? where ID=? and poiID=?",[($name,$id,$poiID)]) if (!$debug);
 		}
 	}
 }

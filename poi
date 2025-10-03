@@ -6189,6 +6189,8 @@ sub getPOIname {
 sub getUsername {
 	my $userID = shift;
 
+	return "system" if (!$userID);
+
 	return $lookup_username{$userID} if ($lookup_username{$userID});
 
 	my @rows = db_mysql($db,"select username from users where ID=?",[($userID)]);
