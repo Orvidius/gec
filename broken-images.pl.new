@@ -12,11 +12,13 @@ use CGI;
 use JSON;
 use LWP::Simple;
 use LWP::UserAgent;
+use File::Copy;
 use POSIX qw(floor strftime);
 
 use lib "/var/www/edastro.com/perl";
 use ATOMS qw(btrim epoch2date date2epoch);
 use DB qw(rows_mysql db_mysql $print_queries show_queries);
+use AUTH qw(info);
 
 my $db		= 'edastro';
 my $timeout	= 30;
@@ -132,7 +134,8 @@ sub add_gallery {
 
 	return;
 
-	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
+#	my $id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]);
+my $id = 0;
 	my $ext_line = `file $tmp`;
 	chomp $ext_line;
 
@@ -160,19 +163,32 @@ sub add_gallery {
 	my $add = $ext_orig eq 'gif' ? '[0]' : '';
 
 	if ($ext_new =~ /png/i || $ext_new ne $ext_orig) {
-		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file);	# local image
+#		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file);	# local image
 		info("Converted $tmp to $file") if (-e $file);
 		info("Convert FAILED $tmp to $file") if (!-e $file);
 	} else {
-		move($tmp,$file);						     # local image
+#		move($tmp,$file);						     # local image
 		info("Moved $tmp to $file") if (-e $file);
 		info("Move FAILED $tmp to $file") if (!-e $file);
 	}
 
 	unlink $tmp if (-e $tmp);
 
-	# Need to update the gallery entry with the local file and URL
 	# Also need to update the description + descriptionHTML with the new URL
+
+#	db_mysql($db,"update gallery set localimage=? where ID=?",[($uri.'?'.time,$id)]);
+
+	my @rows = db_mysql($db,"select description,descriptionHTML from poidata where poiID=?",[($poiID)]);
+	foreach my $r (@rows) {
+		my ($desc,$html) = ($$r{description},$$r{descriptionHTML});
+
+		$desc =~ s/\Q$url\E/$uri/gs;
+		$html =~ s/\Q$url\E/$uri/gs;
+
+		if ($desc ne $$r{description} || $html ne $$r{descriptionHTML}) {
+#			db_mysql($db,"update poidata set description=?,descriptionHTML=? where poiID=?",[($dec,$html,$poiID)]);
+		}
+	}
 }
 
 sub quiet_system {
