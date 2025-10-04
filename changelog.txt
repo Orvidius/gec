@@ -5,7 +5,7 @@
 - Added a "cancel" button for editing an existing POI, which simply returns to
 the "view" page for that POI.
 - Inline markdown image links will start automatically re-hosting on EDAstro
-to avoid issues with images becoming available in the future, including
+to avoid issues with images becoming unavailable in the future, including
 regional exclusions (imgur in the UK for example).
 
 ###2025-08-06
