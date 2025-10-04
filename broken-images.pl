@@ -4,7 +4,7 @@ use strict; $|=1;
 use utf8;
 use feature qw( unicode_strings );
 
-use CGI::Carp qw(fatalsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser);
 
 use HTML::Entities;
 use Encode;
@@ -12,14 +12,20 @@ use CGI;
 use JSON;
 use LWP::Simple;
 use LWP::UserAgent;
+use File::Copy;
 use POSIX qw(floor strftime);
 
 use lib "/var/www/edastro.com/perl";
 use ATOMS qw(btrim epoch2date date2epoch);
 use DB qw(rows_mysql db_mysql $print_queries show_queries);
+use AUTH qw(info);
+
+my $mkdir       = '/usr/bin/mkdir';
+my $convert     = '/usr/local/bin/convert';
 
 my $db		= 'edastro';
 my $timeout	= 30;
+my $debug	= 0;
 
 $SIG{ALRM} = sub { die "timeout"; };
 
@@ -34,6 +40,7 @@ my $found = 0;
 my @rows = db_mysql($db,"select ID,name,topimage,toplocalimage,mainimage,mainimagehidden from poi where deleted is null");
 foreach my $r (@rows) {
 	my %images = ();
+	my %from_desc = ();
 
 	next if ($ARGV[0] && $$r{ID} != $ARGV[0]);
 
@@ -55,11 +62,16 @@ foreach my $r (@rows) {
 		$images{$$r{ID}}{$img} = $$i{title};
 	}
 
-	while ($desc =~ /[!|\!]\[[^\]]*\]\((https?:\/\/([^\)]+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
-		my $img = $1;
+# ![ABC 2](https://storage.googleapis.com/canonn-downloads/screenshots/Plua%20Chruia%20LG-Y%20d15/Plua%20Chruia%20LG-Y%20d15_(ABC%202)_LCU%20No%20Fool%20Like%20One_00001.png)
+#
+	while ($desc =~ /[!|\!]\[([^\]]*)\]\((https?:\/\/(.+(\.(jpg|png|gif))?(\?[^\)*])?))\)(\s|$)/ig) {
+		my $title = $1;
+		my $img = $2;
+		$title = $img if (!$title);
 		$img = "https://edastro.com$img" if ($img =~ /^\//);
 		#print "Test: $img\n";
-		$images{$$r{ID}}{$img} = $img;
+		$images{$$r{ID}}{$img} = $title;
+		$from_desc{$$r{ID}}{$img} = 1;
 	}
 
 	foreach my $poiID (sort {$a<=>$b} keys %images) {
@@ -90,14 +102,42 @@ foreach my $r (@rows) {
 				};
 				$ok = ($bytes || (-e $tmp && (stat($tmp))[7])) ? 1 : 0;
 			}
-			unlink $tmp if (-e $tmp);
 
 			if (!$ok) {
 				print "ERROR: /gec/$poiID ($$r{name}) - $url ($name)\n";
 
 				print HTML "<tr><td align=\"right\">$poiID\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"/gec/view/$poiID\">$$r{name}</a></td><td>\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"$url\">$name</a></td></tr>\n" if (!@ARGV);
 				$found++;
+			} else {
+
+				my $ftype = `file $tmp`; chomp $ftype;
+
+				if ($ftype =~ /HTML document/i) {
+					print "=HTML: /gec/$poiID ($$r{name}) - $url ($name)\n";
+					$ok = 0;
+				} elsif ($ftype !~ /image data/i) {
+					print "= DOC: /gec/$poiID ($$r{name}) - $url ($name)\n";
+					$ok = 0;
+				} elsif (!-e $tmp) {
+					print "=ZERO: /gec/$poiID ($$r{name}) - $url ($name)\n";
+					$ok = 0;
+				} else {
+
+					print " * OK: /gec/$poiID ($$r{name}) - $url ($name)\n";
+	
+					# Add to gallery here
+					if ($from_desc{$poiID}{$url} && $url !~ /^https?:\/\/edastro.com\// && -e $tmp) {
+						add_gallery($poiID,$tmp,$url,$name);
+					}
+				}
+
+				if (!$ok) {
+					print HTML "<tr><td align=\"right\">$poiID\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"/gec/view/$poiID\">$$r{name}</a></td><td>\&nbsp;\&nbsp;\&nbsp;</td><td><a href=\"$url\">$name</a></td></tr>\n" if (!@ARGV);
+					$found++;
+				}
 			}
+
+			unlink $tmp if (-e $tmp);
 		}
 	}
 	
@@ -113,6 +153,96 @@ if (!@ARGV) {
 
 exit;
 
+#############################################################################
+
+sub add_gallery {
+	my ($poiID,$tmp,$url,$name) = @_;
+
+	$name = substr($name,0,32) if (length($name) > 32);
+
+	my $id = 0;
+	$id = db_mysql($db,"insert into gallery (created,poiID,ownerID,title,imagelink) values (now(),?,?,?,?)",[($poiID,0,$name,$url)]) if (!$debug);
+	my $ext_line = `file $tmp`;
+	chomp $ext_line;
+
+	print "\t^ File: $ext_line\n";
+
+	my $ext_orig = undef;
+	if ($ext_line =~ /(PNG|JPG|JPEG|GIF) image data/i) {
+		$ext_orig = lc($1);
+		$ext_orig =~ s/jpeg/jpg/;
+	}
+
+	my $ext_new = $ext_orig;
+	$ext_new = 'jpg' if ($ext_orig =~ /(jpg|jpeg|png)/);
+
+	return undef if (!$ext_new);
+
+	my $pid = sprintf("%09u",$id);
+	$pid =~ /(\d{3})(\d{3})(\d{3})/;
+	my $path  = "/poiphotos/$1/$2";
+	my $fn    = "$3.$ext_new";
+	my $loc   = "/www/edastro.com$path";
+	my $file  = "$loc/$fn";
+	my $uri   = "$path/$fn";
+
+	if ($name eq $url || $name =~ /^https?:\/\//) {
+		$name =~ s/^\s*https?\/\/.*\///s;
+		if (length($name) > 15) {
+			$name = "$id.$ext_new";
+		}
+	}
+
+	$uri .= '?'.time;
+
+	print "\t^ Create: $file\n";
+
+	quiet_system('/usr/bin/mkdir','-p',$loc) if (!-d $loc);
+
+	my $add = $ext_orig eq 'gif' ? '[0]' : '';
+
+	if ($ext_new =~ /png/i || $ext_new ne $ext_orig) {
+		quiet_system($convert,$tmp.$add,'-resize','1920x1280>',$file) if (!$debug);	# local image
+		info("Converted $tmp to $file") if (-e $file);
+		info("Convert FAILED $tmp to $file") if (!-e $file);
+	} else {
+		move($tmp,$file) if (!$debug);						     # local image
+		info("Moved $tmp to $file") if (-e $file);
+		info("Move FAILED $tmp to $file") if (!-e $file);
+	}
+
+	unlink $tmp if (-e $tmp);
+
+	# Also need to update the description + descriptionHTML with the new URL
+
+	db_mysql($db,"update gallery set localimage=? where ID=?",[($uri,$id)]) if (!$debug);
+
+	my @rows = db_mysql($db,"select description,descriptionHTML from poidata where poiID=?",[($poiID)]);
+	foreach my $r (@rows) {
+		my ($desc,$html) = ($$r{description},$$r{descriptionHTML});
+
+		$desc =~ s/\Q$url\E/$uri/gs;
+		$html =~ s/\Q$url\E/$uri/gs;
+
+		$name = substr($name,0,32) if (length($name) > 32);
+
+		if ($desc ne $$r{description} || $html ne $$r{descriptionHTML}) {
+			#print "DESC: $desc\n\nHTML: $html\n\n";
+			print "\t^ Update: $poiID desc/HTML for $name\n";
+			db_mysql($db,"update poidata set description=?,descriptionHTML=? where poiID=?",[($desc,$html,$poiID)]) if (!$debug);
+			db_mysql($db,"update gallery set title=? where ID=? and poiID=?",[($name,$id,$poiID)]) if (!$debug);
+		}
+	}
+}
+
+sub quiet_system {
+	# https://perldoc.perl.org/perlfaq8#How-can-I-capture-STDERR-from-an-external-command%3f
+	my @ok = ();
+	open( EXEC, "-|", @_);
+	chomp(@ok = <EXEC>);
+	close EXEC;
+	return @ok;
+}
 
 sub binaryGET {
 	my $url = shift;
@@ -126,6 +256,10 @@ sub binaryGET {
 	if ($url =~ /^https?:\/\/([\w\d\-\.]+)\//) {
 		$host = $1;
 	}
+
+	$url =~ s/\)+\s*$//s;
+	$url =~ s/\s+$//s;
+	$url =~ s/^\s+//s;
 
 	my $ua = LWP::UserAgent->new;
 	#$ua->agent('Mozilla/5.0');
@@ -152,8 +286,9 @@ sub binaryGET {
 		close DATA;
 		return length($bin_data);
 	} elsif ($response->status_line =~ /^429/ && $url =~ /^(https?:\/\/(i\.)?imgur\.com\/([\w\d]+\.(png|jpg|jpeg|gif)))(\?\S+)?$/i) {
+		# https://i.imgur.com/OGfLbJu.jpeg
 		my ($link, $i, $fn, $ext) = ($1, $2, $3, $4);
-		print "FAIL: $url (".$response->status_line.")\n";
+		print "FAIL: $url (".$response->status_line.") IMGUR/$ext: $fn\n";
 		#my $exec = "( /usr/bin/ssh -p 222 www\@reaper.necrobones.net 'curl $link' > $outfile ) 2>\&1";
 
 		$link =~ s/\/imgur.com\//\/i.imgur.com\//s if (!$i);

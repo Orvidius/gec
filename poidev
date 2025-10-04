@@ -5531,7 +5531,7 @@ sub update_entry_form {
 
 	}
 
-	make_form('update',$html,\@form,$error,@req);
+	make_form('update',$params{ID},$html,\@form,$error,@req);
 }
 
 sub new_entry_form {
@@ -5553,11 +5553,12 @@ sub new_entry_form {
 	push @form, {type=>'agreement', name=>'license', label=>'Entry will be licensed', labelextra=>"[$licenseLINK]", value=>1, required=>1};
 	push @form, {type=>'agreement', name=>'editing', label=>'I understand that '.$admin_people.' may edit my entry for formatting, minor corrections, and sometimes more extensively for content where it is deemed necessary', labelextra=>"", value=>1, required=>1};
 
-	make_form('new','',\@form,$error,@req);
+	make_form('new',undef,'',\@form,$error,@req);
 }
 
 sub make_form {
 	my $action = shift;
+	my $poiID  = shift;
 	my $topHTML= shift;
 	my $form   = shift;
 	my $error  = shift;
@@ -5693,6 +5694,7 @@ sub make_form {
 	$html .= "<input type=\"hidden\" id=\"preview\" name=\"preview\" value=\"0\">";
 
 	$html .= "<input id=\"buttonpreview\" class=\"poiButton\" type=\"button\" value=\"Preview Description\" onclick=\"document.getElementById('preview').value=1; document.getElementById('PIOeditForm').submit();\">\&nbsp;" if ($action eq 'update');
+	$html .= "<input id=\"buttonpcancel\" class=\"poiButton\" type=\"button\" value=\"Cancel\" onclick=\"greyout();location.href='$relativeURL/view/$poiID';\">\&nbsp;" if ($action eq 'update' and $poiID);
 
 	#$html .= "<input id=\"buttonreset\" type=\"reset\" value=\"Clear Form\">";
 	$html .= "</td></tr>\n</table>\n</form></div>\n";

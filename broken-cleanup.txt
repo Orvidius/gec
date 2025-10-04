@@ -1,0 +1,19 @@
+mysql> select ID,poiID,imagelink,title from gallery where localimage is null;
++------+-------+-----------------------------------------------------------------------------------------------------------------------+----------------------------------+
+| ID   | poiID | imagelink                                                                                                             | title                            |
++------+-------+-----------------------------------------------------------------------------------------------------------------------+----------------------------------+
+|  127 |   150 | https://postimg.cc/v49X14jk][img]https://i.postimg.cc/v49X14jk/w2.jpg                                                 | Starset                          |
+|  311 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426503998410826/20220820193000_1bcc.png                 | Surrounding Walls                |
+|  312 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426503021137970/20220823004955_1bcc.png                 | Bottom Tactical View             |
+|  313 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426502631063613/20220823020103_1bcc.png                 | Krait Landed                     |
+|  314 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426502308110516/20220823024425_1ax.jpg                  | View from half way up            |
+|  315 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426503339909210/Screenshot_0028bcc.png                  | View from the rim                |
+|  316 |   225 | https://cdn.discordapp.com/attachments/968546592233775117/1012426503646085250/20220823033412_1ax.jpg                  | Botton landing                   |
+|  572 |   403 | https://theexpedition.info/wp-content/uploads/2023/05/05-07-2023-00-25-28-Wepue-EG-W-d2-3847-@-Wepue-EG-W-d2-3847.png | View from nearby system          |
+|  923 |    72 | https://qph.fs.quoracdn.net/main-qimg-437079d7febe9417840354fd346bca36                                                | https://qph.fs.quoracdn.net/main |
+| 1061 |   241 | https://abload.de/img/kasuaa-ah020220913-20r8eua.jpg                                                                  | https://abload.de/img/kasuaa-ah0 |
+| 1062 |   241 | https://abload.de/img/kasuaa-ah020220913-20dtfd1.jpg                                                                  | https://abload.de/img/kasuaa-ah0 |
+| 1063 |   241 | https://abload.de/img/kasuaa-ah020220913-20g4e0q.jpg                                                                  | https://abload.de/img/kasuaa-ah0 |
++------+-------+-----------------------------------------------------------------------------------------------------------------------+----------------------------------+
+12 rows in set (0.00 sec)
+
