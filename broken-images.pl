@@ -126,7 +126,7 @@ foreach my $r (@rows) {
 					print " * OK: /gec/$poiID ($$r{name}) - $url ($name)\n";
 	
 					# Add to gallery here
-					if ($from_desc{$poiID}{$url} && $url !~ /^https?:\/\/edastro.com\// && $url !~ /^https?:\/\/cloudfunctions.net\// && -e $tmp) {
+					if ($from_desc{$poiID}{$url} && $url !~ /^https?:\/\/edastro.com\// && $url !~ /^https?:\/\/[\d\w\-\_\.]*cloudfunctions.net\// && -e $tmp) {
 						add_gallery($poiID,$tmp,$url,$name);
 					}
 				}
