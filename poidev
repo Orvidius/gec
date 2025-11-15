@@ -44,6 +44,8 @@ my $BETA		= 0;
 my $BETA_closed 	= 0;
 my $DEV_skip_discord	= 1;
 
+my %cors_sites		= ( 'signals.canonn.tech'=>1 );
+
 my $admin_title		= 'staff'; # people
 my $admin_titles	= 'staff'; # curators
 my $admin_scores	= 'staff'; # curation
@@ -1201,6 +1203,14 @@ sub json_output {
 	
 	if ($rate_limiting) {
 		print "RateLimit-Limit: $$rate{limit}\nRateLimit-Remaining: $$rate{remaining}\nRateLimit-Reset: $$rate{reset}\n";
+	}
+	if (keys %cors_sites) {
+		print "Access-Control-Allow-Methods: GET, POST, OPTIONS\n";
+		print "Access-Control-Allow-Headers: Content-Type, Authorization, Origin\n";
+		#print "Access-Control-Expose-Headers: X-Custom-Header\n";
+		foreach my $site (keys %cors_sites) {
+			print "Access-Control-Allow-Origin: https://$site\n";
+		}
 	}
 	print "Content-Type: application/json\n\n";
 	print JSON->new->encode($href)."\n";
