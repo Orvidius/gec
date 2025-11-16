@@ -148,7 +148,7 @@ if (!@ARGV) {
 	print HTML "</table>\n";
 	close HTML;
 
-	system('/usr/bin/mv','/www/edastro.com/catalog/broken-images-tmp.html','/www/edastro.com/catalog/broken-images.html');
+	system('/usr/bin/mv','-f','/www/edastro.com/catalog/broken-images-tmp.html','/www/edastro.com/catalog/broken-images.html');
 }
 
 exit;
