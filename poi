@@ -16,7 +16,8 @@ use JSON;
 use LWP::Simple;
 use LWP::UserAgent;
 use HTTP::Headers;
-use Text::Markdown 'markdown';
+#use Text::Markdown 'markdown';
+use Text::MultiMarkdown qw(markdown);
 use POSIX qw(floor strftime);
 use Tie::IxHash;
 use WebService::Discord::Webhook;
@@ -7182,6 +7183,11 @@ sub my_markdown {
 	}
 
 	$string =~ s/(<a\s+href=\")/<a target="_blank" href="/gis;
+
+	# |--------------|----------------------:|
+	$string =~ s/<table>/<table class="poiTable tableCellBorder">/gis;
+	$string =~ s/<th(\s+align="[^"]+")?>/<th class="poiTableHeader tableCellBorder"$1>/gis;
+	$string =~ s/<td(\s+align="[^"]+")?>/<td class="poiRow1 tableCellBorder"$1>/gis;
 
 	return $string;
 }

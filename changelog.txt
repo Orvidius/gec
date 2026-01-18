@@ -1,5 +1,9 @@
 
 
+###2026-01-17
+
+- Added support for markdown tables in POI descriptions.
+
 ###2025-10-04
 
 - Added a "cancel" button for editing an existing POI, which simply returns to
