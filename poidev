@@ -7183,6 +7183,13 @@ sub my_markdown {
 
 	$string =~ s/(<a\s+href=\")/<a target="_blank" href="/gis;
 
+	# |--------------|----------------------:|
+
+	if ($string =~ /^(\s*(\|\s*[:\-]+\s*)+\|\s*)(<br>\s*)?[\r\n]*$/m) {
+		$string .= "<p/>\n!!! TABLE !!!\n";
+		$string = "!!! TABLE !!!<p/>\n$string";
+	}
+
 	return $string;
 }
 
