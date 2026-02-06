@@ -1,5 +1,9 @@
 
 
+###2026-02-06
+
+- Fix for italics not rendering in first paragraph of descriptions.
+
 ###2026-01-17
 
 - Added support for markdown tables in POI descriptions.

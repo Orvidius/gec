@@ -7157,12 +7157,14 @@ sub nonbreaking {
 }
 
 sub my_markdown {
-	my $raw = shift;
+	my $raw = "Ridonculous Workaround\n\n".shift;
 
 	$raw =~ s/[ \t]+(!\[[^\]]*\]\(https?)/$1/gs;
 
 	my $string = markdown(filter($raw));
 	my $remove_white = shift;
+
+	$string =~ s/\s*(<p>Ridonculous Workaround<\/p>\s+)+\s*//gs;
 
 	$string =~ s/\x{c2}\x{b0}/\&deg;/gs;
 	$string =~ s/\x{e2}\x{80}\x{99}/\&apos;/gs;
