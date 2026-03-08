@@ -83,7 +83,8 @@ my $licenseLINK	= '<a href="https://creativecommons.org/licenses/by-nc-sa/3.0/">
 my $db		= 'edastro';
 my $baseURL	= 'https://edastro.com';
 #my $cdn		= 'https://edastro.b-cdn.net';
-my $cdn		= 'https://edastro-22971.kxcdn.com';
+#my $cdn		= 'https://edastro-22971.kxcdn.com';
+my $cdn	= '';
 
 #my $relativeURL	= "/poi";
 my $relativeURL	= "/gec"; #"/poi";
