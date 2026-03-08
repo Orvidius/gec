@@ -386,8 +386,8 @@ sub getSession {
 
 	db_mysql('edastro',"delete from $sessiontable where expiration is null or NOW()>expiration");
 
-	my @rows = db_mysql('edastro',"select * from $usertable,$sessiontable where userID=$usertable.ID and sessionID=? and NOW()<expiration and ip=?",
-			[($sessionID,$ENV{REMOTE_ADDR})]);
+	#my @rows = db_mysql('edastro',"select * from $usertable,$sessiontable where userID=$usertable.ID and sessionID=? and NOW()<expiration and ip=?", [($sessionID,$ENV{REMOTE_ADDR})]);
+	my @rows = db_mysql('edastro',"select * from $usertable,$sessiontable where userID=$usertable.ID and sessionID=? and NOW()<expiration", [($sessionID)]);
 
 	if (@rows) {
 		my $r = shift @rows;
