@@ -45,7 +45,7 @@ my $BETA		= 0;
 my $BETA_closed 	= 0;
 my $DEV_skip_discord	= 1;
 
-my %cors_sites		= ( 'signals.canonn.tech'=>1 );
+my %cors_sites		= ( 'signals.canonn.tech'=>1, 'map.canonn.tech'=>1 );
 
 my $admin_title		= 'staff'; # people
 my $admin_titles	= 'staff'; # curators
