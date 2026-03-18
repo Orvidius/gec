@@ -139,6 +139,8 @@ my @t = localtime;
 my $today = sprintf("%04u-%02u-%02u",$t[5]+1900,$t[4]+1,$t[3]);
 my $aprilFools = ($today =~ /\-04\-01$/) ? 1 : 0;
 
+my $http_origin = $ENV{HTTP_ORIGIN};
+
 #$aprilFools = 1; # TESTING
 
 ##########################################################################
@@ -1211,9 +1213,10 @@ sub json_output {
 		print "Access-Control-Allow-Methods: GET, POST, OPTIONS\n";
 		print "Access-Control-Allow-Headers: Content-Type, Authorization, Origin\n";
 		#print "Access-Control-Expose-Headers: X-Custom-Header\n";
-		foreach my $site (keys %cors_sites) {
-			print "Access-Control-Allow-Origin: https://$site\n";
-		}
+#		foreach my $site (keys %cors_sites) {
+#			print "Access-Control-Allow-Origin: https://$site\n" if ($http_origin =~ /^https:\/\/$site/i);
+#		}
+		print "Access-Control-Allow-Origin: *\n";
 	}
 	print "Content-Type: application/json\n\n";
 	print JSON->new->encode($href)."\n";
