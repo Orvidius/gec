@@ -3551,6 +3551,7 @@ sub view {
 	}
 
 	if ($params{id64}>0) {
+		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"View on Spansh\" onclick=\"window.open('https://www.spansh.co.uk/system/$params{id64}', '_blank');\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Canonn System Signals\" onclick=\"window.open('".
 				canonn_signals_link($params{id64})."', '_blank');\"/>\n";
 	}
