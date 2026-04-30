@@ -5569,6 +5569,7 @@ sub new_entry_form {
 	push @form, {type=>'agreement', name=>'agreed', label=>'I accept', labelextra=>"the [<a href=\"$scriptURL/rules\">Rules and Terms of Service</a>]", value=>1, required=>1};
 	push @form, {type=>'agreement', name=>'license', label=>'Entry will be licensed', labelextra=>"[$licenseLINK]", value=>1, required=>1};
 	push @form, {type=>'agreement', name=>'editing', label=>'I understand that '.$admin_people.' may edit my entry for formatting, minor corrections, and sometimes more extensively for content where it is deemed necessary', labelextra=>"", value=>1, required=>1};
+	push @form, {type=>'agreement', name=>'futurecontact', label=>'Staff members may contact you with feedback, requests for changes, or for additional information or images. Please check your email regularly, as a lack of response may result in your POI being deleted.', labelextra=>"", value=>1, required=>1};
 
 	make_form('new',undef,'',\@form,$error,@req);
 }
@@ -5694,7 +5695,7 @@ sub make_form {
 		} elsif ($$f{type} eq 'agreement') {
 
 			$html .= "<tr><td colspan=3><span class=\"mediumtext\">\&nbsp;</span></td></tr>\n";
-			$html .= "<tr><td align=\"right\" colspan=2>$$f{label} $$f{labelextra}:</td><td align=\"left\" style=\"width:150px\">".
+			$html .= "<tr><td align=\"left\" colspan=2>$$f{label} $$f{labelextra}:</td><td align=\"left\" style=\"width:150px\">".
 				"<input type=\"checkbox\" name=\"$$f{name}\" value=\"$$f{value}\"$required$disabled /></td></tr>\n";
 
 		} elsif ($$f{type} eq 'checkbox') {

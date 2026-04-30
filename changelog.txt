@@ -1,5 +1,11 @@
 
 
+###2026-04-30
+
+- Added an agreement checkbox for new POI submissions warning that the POI
+submitter must be reachable for questions or suggestions or else the POI may
+be deleted without approval.
+
 ###2026-04-20
 
 - Added a "View on Spansh" button to POI pages.
