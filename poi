@@ -418,6 +418,10 @@ sub do_catalog {
 			toggle_rare(@req);
 		last };
 
+		/^togglevoting$/ and do {
+			toggle_voting(@req);
+		last };
+
 		/^toggleban$/ and do {
 			toggle_ban(@req);
 		last };
@@ -1856,6 +1860,18 @@ sub toggle_rare {
 	redirect("$scriptURL/view/$poiID");
 }
 
+sub toggle_voting {
+	my $poiID = shift;
+
+	if (!$sessionUserID || !isAdmin()) {
+		render_error('Not authorized.');
+	}
+
+	db_mysql($db,"update poi set voting=1-voting where ID=?",[($poiID)]);
+	
+	redirect("$scriptURL/view/$poiID");
+}
+
 sub change_detail {
 	my ($what, $id, $new) = @_;
 	my $html = '';
@@ -2958,6 +2974,10 @@ sub tablePOI {
 				$html .= "<span class=\"textmagenta boldText flagtext\">$symbol{blackstar}\&thinsp;</span>" if ($$r{rare});
 				$html .= "</td>";
 
+				#$html .= "<td class=\"$class flagtext\">";
+				#$html .= "<span class=\"textmagenta boldText flagtext\">$symbol{attention}\&thinsp;</span>" if ($$r{rare});
+				#$html .= "</td>";
+
 				#$html .= "<td class=\"$class flagtext\">$flags</td>";
 			} else {
 				$html .= "<td$align class=\"$class\">\&nbsp;".filter($val)."\&nbsp;</td>";
@@ -3174,6 +3194,18 @@ sub favorite {
 	redirect($scriptURL."/voterating/$poiID");
 }
 
+sub voting_active {
+	my $poiID = shift;
+
+	return undef if (!$poiID);
+
+	my @rows =  db_mysql($db,"select voting from poi where ID=?",[($poiID)]);
+	foreach my $r (@rows) {
+		return $$r{voting};
+	}
+	return undef;
+}
+
 sub rating_include {
 	my $poiID = shift;
 	my @req   = @_;
@@ -3233,7 +3265,7 @@ sub rating_include {
 	$html .= "</table>";
 	$html .= "</div>\n";
 
-	if (!$sessionUserID || !$sessionDATA{canVote} || (!$allow_self_votes && $sessionUserID == $$r{ownerID}) || !$$r{approved}) {
+	if (!$sessionUserID || !$sessionDATA{canVote} || (!$allow_self_votes && $sessionUserID == $$r{ownerID}) || !$$r{approved} || !voting_active($poiID)) {
 
 		#$html .= "<span class=\"textred\">Not logged in</span><br/>\n" if ($DEV && !$sessionUserID);
 		#$html .= "<span class=\"textyellow\">DEV: $sessionUserID,$sessionDATA{canVote},$$r{ownerID},$$r{approved}</span><br/>\n" if ($DEV);
@@ -3437,6 +3469,7 @@ sub view {
 	$html .= "<span class=\"largetext textred\">( PENDING DELETION )<br/></span>\n" if ($params{requestdelete} && !$params{deleted});
 	$html .= "<span class=\"largetext textred\">( DELETED )<br/></span>\n" if ($params{deleted});
 	$html .= "<span class=\"largetext textmagenta\">$symbol{blackstar} RARE $symbol{blackstar}<br/></span>\n" if ($params{rare});
+	$html .= "<span class=\"largetext textyellow\">$symbol{attention} VOTING SUSPENDED $symbol{attention}<br/></span>\n" if (!$params{voting});
 
 	$html .= "<table class=\"poiViewTable poiViewTableInline\">\n";
 
@@ -3531,6 +3564,7 @@ sub view {
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Change Category\" onclick=\"greyout();location.href='$scriptURL/change/category/$poiID'\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Change System\" onclick=\"greyout();location.href='$scriptURL/change/system/$poiID'\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton poiButtonMagenta\" value=\"Toggle Rare\" onclick=\"greyout();location.href='$scriptURL/togglerare/$poiID'\"/>\n";
+		$ui .= "<input type=\"button\" class=\"poiButton poiButtonMagenta\" value=\"Toggle Voting Suspension\" onclick=\"greyout();location.href='$scriptURL/togglevoting/$poiID'\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Get EDSM ID\" onclick=\"greyout();location.href='$scriptURL/getEDSM/$poiID'\"/>\n" if (!$params{edsm_id});
 	}
 	if (isAdmin() || ($sessionUserID && $sessionUserID==$params{ownerID})) {
