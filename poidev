@@ -3091,6 +3091,8 @@ sub profile {
 				if ($sessionUserID && $sessionUserID==$viewID);
 		$html .= "<input type=\"button\" class=\"poiButton\" value=\"Send test email\" onclick=\"greyout();location.href='$relativeURL/testemail/$viewID';\">\n"
 				if ($sessionUserID && ($sessionUserID==$viewID || isAdmin()));
+		$html .= "<input type=\"button\" class=\"poiButton\" value=\"View Voting History\" onclick=\"greyout();location.href='$relativeURL/votinghistory/$viewID';\">\n"
+				if ($sessionUserID && ($sessionUserID==$viewID || isAdmin()));
 		$html .= "</p>\n";
 
 		if ($sessionUserID && isAdmin()>=2) {
