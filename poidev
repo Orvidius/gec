@@ -302,6 +302,10 @@ sub do_catalog {
 			profile(@req);
 		last };
 
+		/^viewvotes$/ and do {
+			view_votes(@req);
+		last };
+
 		/^scoring$/ and do {
 			scoring(@req);
 		last };
@@ -3029,6 +3033,95 @@ sub ratingBox {
 	return "<div class=\"ratingBox$small ratingBox$color\" onclick=\"location.href='$scriptURL/scoring';return false\">$rating</div>";
 }
 
+sub view_votes {
+	my @req     = @_;
+	my $viewID  = 0;
+
+	if ($req[0] =~ /^(\d+)$/) {
+		$viewID = $1;
+	} elsif (!@req && activeUser()) {
+		$viewID = $sessionUserID;
+	}
+
+	if (!$sessionUserID || ($sessionUserID && $viewID!=$sessionUserID && !isAdmin())) {
+		redirect($scriptURL.'/profile/'.$viewID);
+	}
+
+	if ($viewID ne $req[0]) {
+		redirect($scriptURL.'/viewvotes/'.$viewID);
+	}
+
+	if (!$viewID && $loginUserID) {
+		#$viewID = $loginUserID;
+		redirect($scriptURL.'/viewvotes/'.$loginUserID);
+	}
+
+	my %user = getUserData($viewID);
+
+	if ($viewID && keys %user) {
+		my $html = '';
+
+		my $status = "<span class=\"largetext textgreen\">Active</span>";
+		$status = "<span class=\"largetext textyellow\">Unverified</span>" if (!$user{verified});
+		$status = "<span class=\"largetext textred\">Banned</span>" if ($user{banned});
+
+		my $banbutton = '';
+		$banbutton = "\&nbsp;<input type=\"button\" class=\"poiButton poiButtonRed\" value=\"Ban User\" onclick=\"greyout();location.href='$scriptURL/ban/$viewID'\"/>"
+			if (!$user{banned} && $sessionUserID && isAdmin() && $viewID!=$sessionUserID); # LEVEL 2
+		$banbutton = "\&nbsp;<input type=\"button\" class=\"poiButton poiButtonRed\" value=\"Un-Ban User\" onclick=\"greyout();location.href='$scriptURL/unban/$viewID'\"/>"
+			if ($user{banned} && $sessionUserID && isAdmin() && $viewID!=$sessionUserID); # LEVEL 2
+
+
+		my $avatar = gravatar_url( email => $user{email}, rating=>'pg', size=>80, default=>'https://edastro.com/images/account-icon-grey-80px.png' );
+
+		$html .= "<img src=\"$avatar\" alt=\"$user{username} - Configure avatar images at gravatar.com\" class=\"floatRight\"/>\n" if ($avatar);
+
+		$html .= "<div class=\"poiProfile\">\n";
+		$html .= "<div class=\"poiProfileRating\">\n";
+		$html .= ratingBox($user{rating})."\n";
+		$html .= "</div>\n";
+		$html .= "<div class=\"poiProfileName\">\n";
+		$html .= "<span class=\"bigText\">".commanderName($viewID,$user{username})."<br/></span>\n";
+		$html .= "<span class=\"largetext\">".getAdminRole($user{admin})."</span><br/>\n";
+		$html .= "</div>\n";
+		#$html .= "<div class=\"poiProfileName\"><img src=\"$avatar\" alt=\"$user{username}\"/></div>\n" if ($avatar);
+		$html .= "<div class=\"poiProfileName\">\&nbsp;\&nbsp;\&nbsp;</div>\n";
+		$html .= "<div class=\"poiProfileName\" style=\"vertical-align: bottom\">\n";
+		$html .= "<span class=\"largetext\">Account Status:<br/></span>$status$banbutton<br/></span>\n";
+		$html .= "</div>\n";
+		$html .= "</div><p/>\n";
+
+		$html .= "<p>\n";
+		$html .= "<input type=\"button\" class=\"poiButton\" value=\"View Profile\" onclick=\"greyout();location.href='$relativeURL/profile/$viewID';\">\n";
+		$html .= "</p>\n";
+
+		my @rows = db_mysql($db,"select votes.*,poi.name poiname from votes,poi where voterID=? and poiID=poi.ID order by poiID",[($viewID)]);
+
+		my $histHTML = '<p><div class="lefttext boldtext">Voting view:<br/><table class="sessiondata">'.
+			'<tr><th>POI ID</th><th>POI Name</th><th>Vote ID</th><th>Vote</th><th>Updated</th><th>Delete</th></tr>'."\n";
+
+		foreach my $r (@rows) {
+			$$r{updated} =~ s/ /&nbsp;/gs;
+			$$r{poiname} =~ s/ /&nbsp;/gs;
+			my $stars = "<div data-star=\"".sprintf("%.1f",$$r{score})."\" class=\"normaltext\"></div>";
+			$histHTML .= "<tr><td>\&nbsp;$$r{poiID}\&nbsp;</td><td>\&nbsp;<a href=\"$relativeURL/view/$$r{poiID}\">$$r{poiname}</a>\&nbsp;</td><td>\&nbsp;$$r{ID}\&nbsp;</td><td>\&nbsp;$stars\&nbsp;</td><td>\&nbsp;$$r{updated}\&nbsp;</td><td><input type=\"button\" class=\"poiButton\" value=\"DELETE\" onclick=\"greyout();location.href='$relativeURL/deletevote/$$r{ID}';\"></td></tr>\n";
+		}
+		$histHTML .= "</table></div></p>\n";
+		$html .= $histHTML;
+
+
+		render($html,"Voting View for $user{username}");
+	} else {
+		if ($userBanned) {
+			render_error("Account Restricted");
+		} elsif ($userUnverified) {
+			render_error("Account Unverified");
+		} else {
+			render_error("Invalid userID: ".htmlify($req[0]));
+		}
+	}
+}
+
 sub profile {
 	my @req     = @_;
 	my $viewID  = 0;
@@ -3091,7 +3184,7 @@ sub profile {
 				if ($sessionUserID && $sessionUserID==$viewID);
 		$html .= "<input type=\"button\" class=\"poiButton\" value=\"Send test email\" onclick=\"greyout();location.href='$relativeURL/testemail/$viewID';\">\n"
 				if ($sessionUserID && ($sessionUserID==$viewID || isAdmin()));
-		$html .= "<input type=\"button\" class=\"poiButton\" value=\"View Voting History\" onclick=\"greyout();location.href='$relativeURL/votinghistory/$viewID';\">\n"
+		$html .= "<input type=\"button\" class=\"poiButton\" value=\"View Voting History\" onclick=\"greyout();location.href='$relativeURL/viewvotes/$viewID';\">\n"
 				if ($sessionUserID && ($sessionUserID==$viewID || isAdmin()));
 		$html .= "</p>\n";
 
