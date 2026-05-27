@@ -1,5 +1,9 @@
 
 
+###2026-05-27
+
+- Administation of individual votes available.
+
 ###2026-05-25
 
 - POIs can now be suspended from voting.
