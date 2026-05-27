@@ -306,6 +306,18 @@ sub do_catalog {
 			view_votes(@req);
 		last };
 
+		/^deletevote$/ and do {
+			delete_vote('user',@req);
+		last };
+
+		/^deletepoivote$/ and do {
+			delete_vote('poi',@req);
+		last };
+
+		/^viewpoivotes$/ and do {
+			view_poi_votes(@req);
+		last };
+
 		/^scoring$/ and do {
 			scoring(@req);
 		last };
@@ -1182,16 +1194,16 @@ sub json_output {
 		$$href{counts}{year} = ${$$rows[0]}{num}+0;
 
 
-		my $rows = rows_mysql('edastro',"select count(*) as num from votes");
+		my $rows = rows_mysql('edastro',"select count(*) as num from votes where score is not null");
 		$$href{votes}{total} = ${$$rows[0]}{num}+0;
 
-		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 7 day)<=updated");
+		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 7 day)<=updated and score is not null");
 		$$href{votes}{week} = ${$$rows[0]}{num}+0;
 
-		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 30 day)<=updated");
+		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 30 day)<=updated and score is not null");
 		$$href{votes}{days30} = ${$$rows[0]}{num}+0;
 
-		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 1 year)<=updated");
+		$rows = rows_mysql('edastro',"select count(*) as num from votes where date_sub(now(),interval 1 year)<=updated and score is not null");
 		$$href{votes}{year} = ${$$rows[0]}{num}+0;
 
 
@@ -2837,8 +2849,8 @@ sub tablePOI {
 			}
 		}
 	
-		@votes = db_mysql($db,"select score,poiID from votes where poiID in (".join(',',@list).") and voterID=?",[($sessionUserID)]) if (!$pull_all);
-		@votes = db_mysql($db,"select score,poiID from votes where voterID=?",[($sessionUserID)]) if ($pull_all);
+		@votes = db_mysql($db,"select score,poiID from votes where poiID in (".join(',',@list).") and voterID=? and score is not null",[($sessionUserID)]) if (!$pull_all);
+		@votes = db_mysql($db,"select score,poiID from votes where voterID=? and score is not null",[($sessionUserID)]) if ($pull_all);
 		foreach my $v (@votes) {
 			$vote{$$v{poiID}} = $$v{score};
 		}
@@ -3033,6 +3045,75 @@ sub ratingBox {
 	return "<div class=\"ratingBox$small ratingBox$color\" onclick=\"location.href='$scriptURL/scoring';return false\">$rating</div>";
 }
 
+sub delete_vote {
+	my $from    = shift;
+	my @req     = @_;
+	my $voteID  = undef;
+
+	if ($req[0] =~ /^(\d+)$/) {
+		$voteID = $1;
+	} else {
+		redirect($scriptURL);
+	}
+
+	my @rows = db_mysql($db,"select * from votes where ID=?",[($voteID)]);
+	redirect($scriptURL) if (!@rows);
+	my $r = shift @rows;
+	redirect($scriptURL) if (!$$r{voterID});
+
+	if (!$sessionUserID || ($sessionUserID && $$r{voterID}!=$sessionUserID && !isAdmin())) {
+		redirect($scriptURL.'/viewvotes/'.$$r{voterID});
+	}
+
+	db_mysql($db,"update votes set score=NULL where ID=? and voterID=?",[($voteID,$$r{voterID})]);
+	update_votecount($sessionUserID);
+	recalculateScore($$r{poiID});
+	recalculateUserRating($$r{voterID});
+	redirect($scriptURL.'/viewvotes/'.$$r{voterID}) if ($from eq 'user');
+	redirect($scriptURL.'/viewpoivotes/'.$$r{poiID});
+}
+
+sub view_poi_votes {
+	my @req     = @_;
+	my $poiID  = 0;
+
+	if ($req[0] =~ /^(\d+)$/) {
+		$poiID = $1;
+	}
+
+	if (!$sessionUserID || ($sessionUserID && !isAdmin())) {
+		redirect($scriptURL.'/view/'.$poiID);
+	}
+
+	if ($poiID) {
+		my @rows = db_mysql($db,"select name from poi where ID=?",[($poiID)]);
+		my $poiname = '';
+		foreach my $r (@rows) {
+			$poiname = $$r{name};
+		}
+
+		my $html = '<p><div class="lefttext boldtext">Voting view for <a href="'."$relativeURL/view/$poiID".'">'."$poiID / $poiname".'</a>:<br/><table class="sessiondata">'.
+			'<tr><th>Voter ID</th><th>Voter Name</th><th>Vote ID</th><th>Vote</th><th>Updated</th><th>Delete</th></tr>'."\n";
+
+		my @rows = db_mysql($db,"select votes.*,users.username username from votes,users where poiID=? and voterID=users.ID order by voterID",[($poiID)]);
+
+		foreach my $r (@rows) {
+			$$r{updated} =~ s/ /&nbsp;/gs;
+			$$r{poiname} =~ s/ /&nbsp;/gs;
+			my $stars = "<div data-star=\"".sprintf("%.1f",$$r{score})."\" class=\"normaltext\"></div>";
+			$stars = "-deleted-" if (!$$r{score});
+
+			$html .= "<tr><td>\&nbsp;$$r{voterID}\&nbsp;</td><td>\&nbsp;<a href=\"$relativeURL/profile/$$r{voterID}\">$$r{username}</a>\&nbsp;</td><td>\&nbsp;$$r{ID}\&nbsp;</td><td>\&nbsp;$stars\&nbsp;</td><td>\&nbsp;$$r{updated}\&nbsp;</td><td><input type=\"button\" class=\"poiButton\" value=\"DELETE\" onclick=\"greyout();location.href='$relativeURL/deletepoivote/$$r{ID}';\"></td></tr>\n";
+		}
+		$html .= "</table></div></p>\n";
+
+
+		render($html,"Voting View POI #$poiID");
+	} else {
+		redirect($scriptURL);
+	}
+}
+
 sub view_votes {
 	my @req     = @_;
 	my $viewID  = 0;
@@ -3104,6 +3185,8 @@ sub view_votes {
 			$$r{updated} =~ s/ /&nbsp;/gs;
 			$$r{poiname} =~ s/ /&nbsp;/gs;
 			my $stars = "<div data-star=\"".sprintf("%.1f",$$r{score})."\" class=\"normaltext\"></div>";
+			$stars = "-deleted-" if (!$$r{score});
+
 			$histHTML .= "<tr><td>\&nbsp;$$r{poiID}\&nbsp;</td><td>\&nbsp;<a href=\"$relativeURL/view/$$r{poiID}\">$$r{poiname}</a>\&nbsp;</td><td>\&nbsp;$$r{ID}\&nbsp;</td><td>\&nbsp;$stars\&nbsp;</td><td>\&nbsp;$$r{updated}\&nbsp;</td><td><input type=\"button\" class=\"poiButton\" value=\"DELETE\" onclick=\"greyout();location.href='$relativeURL/deletevote/$$r{ID}';\"></td></tr>\n";
 		}
 		$histHTML .= "</table></div></p>\n";
@@ -3317,7 +3400,7 @@ sub rating_include {
 	}
 
 
-	my @rows = db_mysql($db,"select score,count(*) as count from votes where poiID=? group by score order by score",[($poiID)]);
+	my @rows = db_mysql($db,"select score,count(*) as count from votes where poiID=? and score is not null group by score order by score",[($poiID)]);
 	foreach my $r (@rows) {
 		$votecounts{$$r{score}} = $$r{count};
 	}
@@ -3384,7 +3467,7 @@ sub rating_include {
 		$html .= "<br/>\n";
 
 		my %sel = ();
-		my @rows = db_mysql($db,"select * from votes where voterID=? and poiID=?",[($sessionUserID,$poiID)]);
+		my @rows = db_mysql($db,"select * from votes where voterID=? and poiID=? and score is not null",[($sessionUserID,$poiID)]);
 		if (@rows) {
 			$sel{${$rows[0]}{score}} = ' checked';
 		}
@@ -3512,7 +3595,7 @@ sub view {
 	}
 
 	if ($sessionUserID && $poiID) {
-		db_mysql($db,"update votes set updated=now() where poiID=? and voterID=?",[($poiID,$sessionUserID)]);
+		#db_mysql($db,"update votes set updated=now() where poiID=? and voterID=?",[($poiID,$sessionUserID)]);
 	}
 
 	my @form = ();
@@ -3661,6 +3744,7 @@ sub view {
 		$ui .= "<input type=\"button\" class=\"poiButton poiButtonMagenta\" value=\"Toggle Rare\" onclick=\"greyout();location.href='$scriptURL/togglerare/$poiID'\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton poiButtonMagenta\" value=\"Toggle Voting Suspension\" onclick=\"greyout();location.href='$scriptURL/togglevoting/$poiID'\"/>\n";
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Get EDSM ID\" onclick=\"greyout();location.href='$scriptURL/getEDSM/$poiID'\"/>\n" if (!$params{edsm_id});
+		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"View Votes\" onclick=\"greyout();location.href='$scriptURL/viewpoivotes/$poiID'\"/>\n";
 	}
 	if (isAdmin() || ($sessionUserID && $sessionUserID==$params{ownerID})) {
 		$ui .= "<input type=\"button\" class=\"poiButton\" value=\"Transfer Ownership\" onclick=\"greyout();location.href='$scriptURL/change/owner/$poiID'\"/>\n";
@@ -5945,7 +6029,7 @@ sub vote {
 	my @rows = db_mysql($db,"select * from votes where voterID=? and poiID=?",[($sessionUserID,$poiID)]);
 
 	if (int(@rows)==1) {
-		db_mysql($db,"update votes set score=? where voterID=? and poiID=?",[($score,$sessionUserID,$poiID)]);
+		db_mysql($db,"update votes set score=? where voterID=? and poiID=? and (score is null or score!=?)",[($score,$sessionUserID,$poiID,$score)]);
 	} else {
 		db_mysql($db,"delete from votes where voterID=? and poiID=?",[($sessionUserID,$poiID)]) if (@rows);
 		db_mysql($db,"insert into votes (score,voterID,poiID) values (?,?,?)",[($score,$sessionUserID,$poiID)]);
@@ -5962,7 +6046,7 @@ sub update_votecount {
 	my $userID = shift;
 
 	my @rows = db_mysql($db,"select count(*) as num from votes,poi where voterID=? and poiID=poi.ID and ".
-				"hidden is null and deleted is null and approved is not null",[($userID)]);
+				"hidden is null and deleted is null and approved is not null and votes.score is not null",[($userID)]);
 	if (@rows) {
 		my $r = shift @rows;
 		db_mysql($db,"update users set votes=? where ID=?",[($$r{num},$userID)]);
@@ -5984,9 +6068,9 @@ sub recalculateScore {
 	my $rows;
 
 	if ($allow_self_votes) {
-		$rows = rows_mysql($db,"select votes.score,admin from votes,users where poiID=? and voterID=users.ID",[($poiID)]);
+		$rows = rows_mysql($db,"select votes.score,admin from votes,users where poiID=? and voterID=users.ID and score is not null",[($poiID)]);
 	} else {
-		$rows = rows_mysql($db,"select votes.score,admin from votes,users,poi where poiID=? and voterID=users.ID and poiID=poi.ID and voterID!=ownerID",[($poiID)]);
+		$rows = rows_mysql($db,"select votes.score,admin from votes,users,poi where poiID=? and voterID=users.ID and poiID=poi.ID and voterID!=ownerID and votes.score is not null",[($poiID)]);
 	}
 	if (ref($rows) eq 'ARRAY' && int(@$rows)) {
 		$count = int(@$rows);
