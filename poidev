@@ -3095,7 +3095,7 @@ sub view_votes {
 		$html .= "<input type=\"button\" class=\"poiButton\" value=\"View Profile\" onclick=\"greyout();location.href='$relativeURL/profile/$viewID';\">\n";
 		$html .= "</p>\n";
 
-		my @rows = db_mysql($db,"select votes.*,poi.name poiname from votes,poi where voterID=? and poiID=poi.ID order by poiID",[($viewID)]);
+		my @rows = db_mysql($db,"select votes.*,poi.name poiname from votes,poi where voterID=? and poiID=poi.ID order by poiID desc",[($viewID)]);
 
 		my $histHTML = '<p><div class="lefttext boldtext">Voting view:<br/><table class="sessiondata">'.
 			'<tr><th>POI ID</th><th>POI Name</th><th>Vote ID</th><th>Vote</th><th>Updated</th><th>Delete</th></tr>'."\n";
