@@ -3443,9 +3443,11 @@ sub rating_include {
 	$html .= "</table>";
 	$html .= "</div>\n";
 
+	if (0) {
 	open TXT, ">>/www/edastro.com/catalog/voting-avail.log";
 	print TXT "userID=$sessionUserID,canVote=$sessionDATA{canVote},selfVoting=$allow_self_votes,ownerID=$$r{ownerID},approved=$$r{approved},votingActive=".voting_active($poiID).",poiID=$poiID\r\n";
 	close TXT;
+	}
 
 	if (!$sessionUserID || !$sessionDATA{canVote} || (!$allow_self_votes && $sessionUserID == $$r{ownerID}) || !$$r{approved} || !voting_active($poiID)) {
 
