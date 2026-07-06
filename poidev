@@ -5738,7 +5738,8 @@ sub update_entry_form {
 	push @form, {type=>'text', name=>'topimage', label=>'Main Image Link', maxlength=>255, size=>40, value=>$params{topimage}, required=>1};
 	push @form, {type=>'text', name=>'discoverer', label=>'Original Discoverer (optional)', maxlength=>32, size=>40, value=>$params{discoverer} };
 	push @form, {type=>'textarea', name=>'summary', label=>'Short Summary (one or two sentences, text only)', maxlength=>255, cols=>80, rows=>3, value=>$params{summary}, required=>1};
-	push @form, {type=>'textarea', name=>'description', label=>'Detailed Description (<a href="https://www.markdownguide.org/basic-syntax/" target="_blank">markdown syntax</a> permitted) (<a href="https://www.markdownguide.org/cheat-sheet/" target="_blank">cheat sheet</a>)', maxlength=>$maxlength{description}, cols=>80, rows=>18, value=>$params{description}."\n\n", required=>1};
+	#push @form, {type=>'textarea', name=>'description', label=>'Detailed Description (<a href="https://www.markdownguide.org/basic-syntax/" target="_blank">markdown syntax</a> permitted) (<a href="https://www.markdownguide.org/cheat-sheet/" target="_blank">cheat sheet</a>)', maxlength=>$maxlength{description}, cols=>80, rows=>18, value=>$params{description}."\n\n", required=>1};
+	push @form, {type=>'textarea', name=>'description', label=>'Detailed Description (<a href="https://www.markdownguide.org/basic-syntax/" target="_blank">markdown syntax</a> permitted)', maxlength=>$maxlength{description}, cols=>80, rows=>18, value=>$params{description}."\n\n", required=>1};
 
 	if ($error eq '<PREVIEW>' || $params{description}) {
 		push @form, {type=>'preview', name=>'descriptionHTML', label=>'Description Preview', value=>$params{description}, required=>1};
@@ -7404,6 +7405,9 @@ sub my_markdown {
 
 	$string =~ s/(<img [^>]+>)/<p align="center">$1<\/p>/gis;
 	$string =~ s/(<p( [^>]*)?>)(<img [^>]+>)(<\/p>)/<p align="center">$3<\/p>/gis;
+
+	$string =~ s/\~(\S+)\~/<sub>$1<\/sub>/gis;
+	$string =~ s/\^(\S+)\^/<sup>$1<\/sup>/gis;
 
 	if ($remove_white) {
 		$string =~ s/^\s*(<\/?p>|<\/?br\/?>|\s+)+\s*//s;
