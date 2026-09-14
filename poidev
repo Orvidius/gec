@@ -2204,7 +2204,7 @@ sub post_message {
 		my $html = "";
 
 		$html .= "<div class=\"poiFeedback\">\n";
-		$html .= "<p><span class=\"textred\">Message must be between 10 and 1000 characters in length.</span></p>\n" if ($message && (length($message)<10 || length($message) > 1000));
+		$html .= "<p><span class=\"textred\">Message must be between 10 and 1000 characters in length [".length($message)."].</span></p>\n" if ($message && (length($message)<10 || length($message) > 1050));
 		$html .= "<p><span class=\"textred\">Must select a message reason.</span></p>\n" if (!$reason);
 		$html .= "<form onsubmit=\"greyout();\" action=\"$scriptURL/msg/$poiID\" method=\"POST\" accept-charset=\"utf-8\">\n";
 		$html .= "<input type=\"hidden\" name=\"r\" value=\"msg/$poiID\">\n";
@@ -5429,7 +5429,7 @@ sub update_entry {
 		$s =~ s/\r//gs;
 		$s =~ s/./ /gs;
 		my $len = length($s);
-		if ($data{$v} && $maxlength{$v} && $len > $maxlength{$v}) {
+		if ($data{$v} && $maxlength{$v} && $len > $maxlength{$v}+50) {
 			$error = "Field \"$v\" must be no longer than $maxlength{$v} characters in length (".commify($len)." submitted).";
 		}
 		if ($data{$v} && $minlength{$v} && $len < $minlength{$v}) {
