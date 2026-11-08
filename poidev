@@ -4353,6 +4353,7 @@ sub image_update {
 				}
 				
 				if ($newTITLE && $newTITLE ne $$ref{title}) {
+					$newTITLE = substr($newTITLE,0,255) if (length($newTITLE)>255);
 					db_mysql($db,"update gallery set title=? where ID=?",[($newTITLE,$imgID)]);
 					$title = htmlify($newTITLE);
 				}
